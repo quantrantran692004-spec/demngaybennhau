@@ -75,7 +75,7 @@ Bạn **KHÔNG CẦN** phải sửa code trong source file! Website được thi
 
 ## 5. SAO LƯU DỮ LIỆU & CHUYỂN SANG MÁY KHÁC (BACKUP & RESTORE)
 
-Vì toàn bộ dữ liệu được lưu an toàn trên trình duyệt của máy hiện tại:
+Mặc định, dữ liệu được lưu trên trình duyệt của máy hiện tại. Sau khi cấu hình kho cloud, hồ sơ/ảnh tùy chỉnh và nhạc tải lên sẽ đồng bộ theo tài khoản.
 * Để sao lưu hoặc chuyển website sang máy tính/điện thoại của cô ấy:
   1. Vào **Cài đặt** -> chọn tab **"Sao Lưu & Khôi Phục"**.
   2. Nhấn **"Tải bản sao lưu JSON về máy"**.
@@ -83,7 +83,13 @@ Vì toàn bộ dữ liệu được lưu an toàn trên trình duyệt của má
 
 ---
 
-## 6. CÁCH BUILD & ĐƯA LÊN INTERNET MIỄN PHÍ
+## 6. KHO CLOUD RIÊNG THEO TÀI KHOẢN
+
+Xem [hướng dẫn thiết lập Supabase](docs/SUPABASE_SETUP.md) để bật đăng nhập email/mật khẩu, chạy schema có Row Level Security và cấu hình các biến môi trường Vercel. Không đưa `service_role` key lên trình duyệt hoặc GitHub.
+
+---
+
+## 7. CÁCH BUILD & ĐƯA LÊN INTERNET MIỄN PHÍ
 
 ### Đóng gói website:
 ```powershell

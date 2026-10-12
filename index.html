@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Our Love Space — Thế Giới Tình Yêu Hiện Đại Của Hai Đứa</title>
+  <meta name="supabase-url" content="%VITE_SUPABASE_URL%">
+  <meta name="supabase-anon-key" content="%VITE_SUPABASE_ANON_KEY%">
   
   <!-- Google Fonts: Modern Clean Geometric Sans & Sweet Accent -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,6 +15,7 @@
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -1292,8 +1295,11 @@
           </div>
         </section>
       </div>
+      <section class="mb-4 rounded-2xl border border-pink-100 dark:border-neutral-700 bg-pink-50/40 dark:bg-neutral-800/50 p-4">
+        <div class="flex items-center justify-between gap-3"><div class="min-w-0"><h3 class="text-sm font-bold text-neutral-900 dark:text-white">Tài khoản & kho cloud</h3><p id="cloud-account-label" class="mt-1 truncate text-xs text-neutral-500">Đang kiểm tra…</p><p id="cloud-account-status" aria-live="polite" class="mt-1 text-[11px] text-neutral-500">Đang kiểm tra trạng thái lưu trữ…</p></div><button id="cloud-sign-out" type="button" class="shrink-0 rounded-full border border-pink-200 px-3 py-2 text-xs font-bold text-pink-600">Đăng xuất</button></div>
+      </section>
       <div class="flex justify-between items-center gap-2 mt-6 pt-4 border-t border-pink-100 dark:border-neutral-700">
-        <p class="text-[11px] text-neutral-400">Ảnh chỉ được lưu trên trình duyệt này.</p>
+        <p class="text-[11px] text-neutral-400">Đăng nhập để đồng bộ ảnh và nhạc riêng lên cloud.</p>
         <div class="flex gap-2">
         <button onclick="closeProfileSettings()" class="px-4 py-2 rounded-full text-xs font-bold text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800">Hủy</button>
         <button onclick="saveProfileSettings()" class="btn-gradient px-5 py-2 rounded-full text-white text-xs font-bold shadow-md">Lưu thay đổi</button>
@@ -1351,15 +1357,20 @@
   <!-- JAVASCRIPT LOGIC -->
   <script>
     const PROFILE_STORAGE_KEY = 'our_love_space_profile_v1';
+    function hasCloudConfig() {
+      const url = document.querySelector('meta[name="supabase-url"]')?.content || '';
+      const key = document.querySelector('meta[name="supabase-anon-key"]')?.content || '';
+      return Boolean(url && key && !url.includes('%VITE_') && !key.includes('%VITE_'));
+    }
     const defaultProfile = {
       herName: 'huongmuoi',
       hisName: 'đại ca',
       anniversary: '2023-12-17',
       description: 'Bản hòa tấu độc quyền viết riêng cho hai đứa mình. Từng vòng xoay đĩa than lưu giữ kỷ niệm, từng lời ca là giai điệu dịu dàng nhất gửi đến em bé.',
       gardenName: 'Khu Vườn Tình Yêu',
-      herImage: 'public/profile-huongmuoi.jfif',
-      hisImage: 'public/profile-daica.jfif',
-      backgroundImage: 'public/couple-background.jfif',
+      herImage: '/profile-huongmuoi.jfif',
+      hisImage: '/profile-daica.jfif',
+      backgroundImage: '/couple-background.jfif',
       heroImage: null,
       vinylImage: null,
       songImage: null
@@ -1368,8 +1379,8 @@
 
     function loadProfileSettings() {
       try {
-        const saved = JSON.parse(localStorage.getItem(PROFILE_STORAGE_KEY) || 'null');
-        if (saved && typeof saved === 'object') profile = { ...profile, ...saved };
+        const saved = hasCloudConfig() ? null : JSON.parse(localStorage.getItem(PROFILE_STORAGE_KEY) || 'null');
+        if (saved && typeof saved === 'object') { profile = { ...profile, ...saved }; ['herImage', 'hisImage', 'backgroundImage', 'heroImage', 'vinylImage', 'songImage'].forEach(key => { if (typeof profile[key] === 'string' && profile[key].startsWith('public/')) profile[key] = '/' + profile[key].slice('public/'.length); }); }
       } catch (error) {
         console.warn('Không thể đọc cài đặt hồ sơ:', error);
       }
@@ -1452,9 +1463,7 @@
       if (!file || !file.type.startsWith('image/')) return;
       const reader = new FileReader();
       reader.onload = () => {
-        const image = new Image();
-        image.onload = () => {
-          const frame = document.getElementById('image-crop-frame');
+        const image = new Image(); image.onerror = () => { alert('Điện thoại không đọc được định dạng ảnh này. Hãy chọn JPG, PNG hoặc WebP rồi thử lại.'); }; image.onload = () => { const frame = document.getElementById('image-crop-frame');
           const preview = document.getElementById('image-crop-preview');
           const maxWidth = Math.min(448, window.innerWidth - 48);
           const frameHeight = Math.min(320, maxWidth / ratio);
@@ -1579,7 +1588,7 @@
       const sourceY = Math.max(0, Math.min(cropState.image.naturalHeight, (selection.y - cropState.y) / displayScale));
       const sourceWidth = Math.max(1, Math.min(cropState.image.naturalWidth - sourceX, selection.width / displayScale));
       const sourceHeight = Math.max(1, Math.min(cropState.image.naturalHeight - sourceY, selection.height / displayScale));
-      const maxOutputSize = 2400;
+      const maxOutputSize = 1200;
       const sourceRatio = sourceWidth / sourceHeight;
       const outputWidth = Math.min(maxOutputSize, Math.max(1, Math.round(sourceWidth)));
       const outputHeight = Math.min(maxOutputSize, Math.max(1, Math.round(outputWidth / sourceRatio)));
@@ -1589,9 +1598,8 @@
       const context = canvas.getContext('2d');
       context.imageSmoothingEnabled = true;
       context.imageSmoothingQuality = 'high';
-      context.drawImage(cropState.image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, outputWidth, outputHeight);
-      const outputType = cropState.sourceType === 'image/png' ? 'image/png' : 'image/jpeg';
-      const result = canvas.toDataURL(outputType, outputType === 'image/png' ? undefined : 0.96);
+      context.fillStyle = '#fff'; context.fillRect(0, 0, outputWidth, outputHeight); context.drawImage(cropState.image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, outputWidth, outputHeight);
+      const outputType = 'image/jpeg'; const result = canvas.toDataURL(outputType, 0.82);
       if (cropState.onConfirm) cropState.onConfirm(result);
       else croppedImages[cropState.targetId] = result;
       croppedImages[cropState.targetId] = result;
@@ -1769,7 +1777,9 @@
           vinylImage: vinylImage || profile.vinylImage,
           songImage: songImage || profile.songImage
         };
-        localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+        const localKey = window.loveCloud?.userId ? `${PROFILE_STORAGE_KEY}:${window.loveCloud.userId}` : PROFILE_STORAGE_KEY;
+        localStorage.setItem(localKey, JSON.stringify(profile));
+        if (window.loveCloud?.isConfigured) await window.loveCloud.saveProfile(profile);
         applyProfileSettings();
         closeProfileSettings();
       } catch (error) {
@@ -1851,7 +1861,9 @@
         openImageCropper(file, 'couple-background', 16 / 9, result => {
           document.getElementById('couple-bg-img').src = result;
           profile.backgroundImage = result;
-          localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+          const localKey = window.loveCloud?.userId ? `${PROFILE_STORAGE_KEY}:${window.loveCloud.userId}` : PROFILE_STORAGE_KEY;
+          localStorage.setItem(localKey, JSON.stringify(profile));
+          if (window.loveCloud?.isConfigured) window.loveCloud.saveProfile(profile).catch(error => console.error('Không lưu được ảnh nền lên cloud:', error));
         });
       }
     }
@@ -2140,6 +2152,7 @@
     }
 
     async function saveCustomSong(file) {
+      if (window.loveCloud?.isConfigured) return window.loveCloud.uploadSong(file);
       const record = {
         id: 'custom-' + Date.now() + '-' + Math.random().toString(36).slice(2),
         title: file.name.replace(/\.[^/.]+$/, '') || 'Bài hát mới',
@@ -2165,6 +2178,7 @@
     }
 
     async function restoreCustomSongs() {
+      if (hasCloudConfig()) return;
       try {
         const db = await openMusicDatabase();
         const records = await new Promise((resolve, reject) => {
@@ -2353,7 +2367,7 @@
     function setSong(index) {
       currentSongIndex = (index + songs.length) % songs.length;
       const s = songs[currentSongIndex];
-      if (s.storageId) localStorage.setItem('our_love_last_custom_song', s.storageId);
+      if (s.storageId) { const lastKey = window.loveCloud?.userId ? 'our_love_last_custom_song:' + window.loveCloud.userId : 'our_love_last_custom_song'; localStorage.setItem(lastKey, s.storageId); }
       renderUploadedSongs();
       document.getElementById('song-title').innerText = s.title;
       document.getElementById('song-artist').innerText = s.artist;
@@ -3124,6 +3138,39 @@
       window.addEventListener('resize', resize);
       requestAnimationFrame(draw);
     })();
+    window.LoveSpaceApp = {
+      getDefaultProfile: () => ({ ...defaultProfile }),
+      getInitialProfile: () => {
+        try {
+          const saved = JSON.parse(localStorage.getItem(PROFILE_STORAGE_KEY) || 'null');
+          return saved && typeof saved === 'object' ? { ...defaultProfile, ...saved } : { ...defaultProfile };
+        } catch { return { ...defaultProfile }; }
+      },
+      setProfile: (nextProfile, userId) => {
+        profile = { ...defaultProfile, ...nextProfile };
+        localStorage.setItem(`${PROFILE_STORAGE_KEY}:${userId}`, JSON.stringify(profile));
+        applyProfileSettings();
+      },
+      restoreCloudSongs: (cloudSongs) => {
+        cloudSongs.forEach(song => {
+          if (!songs.some(existing => existing.storageId === song.storageId)) songs.push(song);
+        });
+        renderUploadedSongs();
+        const userId = window.loveCloud?.userId;
+        const lastSongId = userId ? localStorage.getItem(`our_love_last_custom_song:${userId}`) : null;
+        const restoredIndex = songs.findIndex(song => song.storageId === lastSongId);
+        if (restoredIndex >= 0) setSong(restoredIndex);
+      }
+    };
   </script>
+  <script src="/cloud-account.js"></script>
+  <div id="cloud-auth-gate" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-white/95 dark:bg-neutral-950/95 backdrop-blur-md p-4">
+    <div class="w-full max-w-md rounded-3xl border border-pink-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-6 sm:p-8 shadow-2xl">
+      <div class="text-center mb-6"><div class="text-3xl text-pink-500">♥</div><h1 class="mt-2 text-2xl font-display font-extrabold text-neutral-900 dark:text-white">Kho riêng của bạn</h1><p class="mt-2 text-sm text-neutral-500 dark:text-neutral-300">Đăng nhập để dùng ảnh và nhạc cá nhân trên các thiết bị của bạn.</p></div>
+      <div class="grid grid-cols-2 gap-2"><button id="cloud-sign-in" type="button" class="rounded-xl border border-pink-200 px-3 py-2.5 text-sm font-bold text-pink-600">Đăng nhập</button><button id="cloud-sign-up" type="button" class="rounded-xl border border-pink-200 px-3 py-2.5 text-sm font-bold text-pink-600">Tạo tài khoản</button></div>
+      <form id="cloud-auth-form" class="mt-4 space-y-3"><label class="block text-sm font-semibold text-neutral-700 dark:text-neutral-200">Email<input id="cloud-auth-email" type="email" autocomplete="email" required class="mt-1 w-full rounded-xl border border-pink-200 bg-white px-3 py-3 text-base text-neutral-900 outline-none focus:ring-2 focus:ring-pink-300" /></label><label class="block text-sm font-semibold text-neutral-700 dark:text-neutral-200">Mật khẩu<input id="cloud-auth-password" type="password" autocomplete="current-password" minlength="8" required class="mt-1 w-full rounded-xl border border-pink-200 bg-white px-3 py-3 text-base text-neutral-900 outline-none focus:ring-2 focus:ring-pink-300" /></label><label class="flex items-start gap-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-300"><input id="cloud-import-local" type="checkbox" checked class="mt-0.5 accent-pink-500" /><span>Chép cài đặt cũ trên trình duyệt này vào tài khoản nếu đây là lần đầu đăng nhập.</span></label><button id="cloud-auth-submit" type="submit" class="btn-gradient w-full rounded-xl px-4 py-3 text-sm font-bold text-white">Đăng nhập</button><p id="cloud-auth-message" role="status" aria-live="polite" class="mt-3 min-h-5 text-sm text-pink-600"></p></form>
+      <p class="mt-4 text-center text-[11px] text-neutral-400">Mỗi tài khoản có dữ liệu riêng. Không chia sẻ mật khẩu với người khác.</p>
+    </div>
+  </div>
 </body>
 </html>
