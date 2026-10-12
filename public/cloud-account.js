@@ -15,12 +15,15 @@
   const message = document.getElementById('cloud-auth-message');
   const signInButton = document.getElementById('cloud-sign-in');
   const signUpButton = document.getElementById('cloud-sign-up');
+  const continueGuestButton = document.getElementById('cloud-continue-guest');
   const migrationToggle = document.getElementById('cloud-import-local');
   const accountLabel = document.getElementById('cloud-account-label');
   const accountStatus = document.getElementById('cloud-account-status');
   const openAuthButton = document.getElementById('cloud-open-auth');
   const signOutButton = document.getElementById('cloud-sign-out');
   let user = null;
+  let guestMode = false;
+  try { guestMode = sessionStorage.getItem('love_space_guest_mode') === 'true'; } catch {}
   let mode = 'signin';
   let activeUserId = null;
   let imagePaths = {};
@@ -40,11 +43,25 @@
   }
 
   function openGate() {
+    guestMode = false;
+    try { sessionStorage.removeItem('love_space_guest_mode'); } catch {}
+    setMode('signin');
+    window.lockMobilePageScroll?.();
     if (gate) gate.classList.remove('hidden');
   }
 
   function closeGate() {
     if (gate) gate.classList.add('hidden');
+    window.unlockMobilePageScroll?.();
+  }
+
+  function continueAsGuest() {
+    guestMode = true;
+    try { sessionStorage.setItem('love_space_guest_mode', 'true'); } catch {}
+    if (accountLabel) accountLabel.textContent = 'Khách — chưa đăng nhập';
+    setConfiguredStatus('Chế độ khách: ảnh và nhạc lưu trên thiết bị này; đăng nhập để đồng bộ.');
+    setMessage('Bạn có thể dùng website ngay. Dữ liệu khách không đồng bộ sang thiết bị khác.');
+    closeGate();
   }
 
   function setMode(nextMode) {
@@ -195,11 +212,18 @@
       activeUserId = null;
       openAuthButton?.classList.remove('hidden');
       signOutButton?.classList.add('hidden');
-      openGate();
-      if (accountLabel) accountLabel.textContent = 'Chưa đăng nhập';
-      setConfiguredStatus('Đăng nhập để đồng bộ ảnh và nhạc riêng trên thiết bị này.');
+      if (guestMode) {
+        if (accountLabel) accountLabel.textContent = 'Khách — chưa đăng nhập';
+        setConfiguredStatus('Chế độ khách: ảnh và nhạc lưu trên thiết bị này; đăng nhập để đồng bộ.');
+      } else {
+        openGate();
+        if (accountLabel) accountLabel.textContent = 'Chưa đăng nhập';
+        setConfiguredStatus('Đăng nhập để đồng bộ ảnh và nhạc riêng trên thiết bị này.');
+      }
       return;
     }
+    guestMode = false;
+    try { sessionStorage.removeItem('love_space_guest_mode'); } catch {}
     if (activeUserId === user.id) return;
     activeUserId = user.id;
     openAuthButton?.classList.add('hidden');
@@ -225,7 +249,7 @@
     isConfigured,
     get userId() { return user?.id || null; },
     async saveProfile(profile) {
-      if (isConfigured) await saveProfile(profile);
+      if (user) await saveProfile(profile);
     },
     async uploadSong(file) {
       return saveSong(file);
@@ -249,6 +273,7 @@
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
   openAuthButton?.addEventListener('click', openGate);
+  continueGuestButton?.addEventListener('click', continueAsGuest);
   signInButton?.addEventListener('click', () => setMode('signin'));
   signUpButton?.addEventListener('click', () => setMode('signup'));
   form?.addEventListener('submit', async (event) => {
