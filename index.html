@@ -511,6 +511,16 @@
     }
 
     @media (max-width: 640px) {
+      body.profile-settings-open {
+        position: fixed;
+        top: calc(0px - var(--profile-settings-scroll-y, 0px));
+        left: 0;
+        right: 0;
+        width: 100%;
+        overflow: hidden;
+        transition: none !important;
+      }
+
       #profile-settings-modal,
       #image-crop-modal {
         align-items: flex-start;
@@ -1333,7 +1343,11 @@
         </section>
       </div>
       <section class="mb-4 rounded-2xl border border-pink-100 dark:border-neutral-700 bg-pink-50/40 dark:bg-neutral-800/50 p-4">
-        <div class="flex items-center justify-between gap-3"><div class="min-w-0"><h3 class="text-sm font-bold text-neutral-900 dark:text-white">Tài khoản & kho cloud</h3><p id="cloud-account-label" class="mt-1 truncate text-xs text-neutral-500">Đang kiểm tra…</p><p id="cloud-account-status" aria-live="polite" class="mt-1 text-[11px] text-neutral-500">Đang kiểm tra trạng thái lưu trữ…</p></div><button id="cloud-sign-out" type="button" class="shrink-0 rounded-full border border-pink-200 px-3 py-2 text-xs font-bold text-pink-600">Đăng xuất</button></div>
+        <div class="flex items-center justify-between gap-3">
+          <div class="min-w-0"><h3 class="text-sm font-bold text-neutral-900 dark:text-white">Tài khoản & kho cloud</h3><p id="cloud-account-label" class="mt-1 truncate text-xs text-neutral-500">Đang kiểm tra…</p><p id="cloud-account-status" aria-live="polite" class="mt-1 text-[11px] text-neutral-500">Đang kiểm tra trạng thái lưu trữ…</p></div>
+          <button id="cloud-open-auth" type="button" class="hidden shrink-0 rounded-full bg-pink-500 px-3 py-2 text-xs font-bold text-white">Đăng nhập</button>
+          <button id="cloud-sign-out" type="button" class="hidden shrink-0 rounded-full border border-pink-200 px-3 py-2 text-xs font-bold text-pink-600">Đăng xuất</button>
+        </div>
       </section>
       <div class="flex justify-between items-center gap-2 mt-6 pt-4 border-t border-pink-100 dark:border-neutral-700">
         <p class="text-[11px] text-neutral-400">Đăng nhập để đồng bộ ảnh và nhạc riêng lên cloud.</p>
@@ -1476,6 +1490,8 @@
       });
     }
 
+    let profileSettingsScrollY = 0;
+
     function openProfileSettings() {
       document.getElementById('settings-her-name').value = profile.herName;
       document.getElementById('settings-his-name').value = profile.hisName;
@@ -1483,6 +1499,11 @@
       document.getElementById('settings-description').value = profile.description;
       document.getElementById('settings-garden-name').value = profile.gardenName || defaultProfile.gardenName;
       const modal = document.getElementById('profile-settings-modal');
+      if (modal.classList.contains('hidden') && window.innerWidth <= 640) {
+        profileSettingsScrollY = window.scrollY || window.pageYOffset;
+        document.body.style.setProperty('--profile-settings-scroll-y', `${profileSettingsScrollY}px`);
+        document.body.classList.add('profile-settings-open');
+      }
       modal.classList.remove('hidden');
       modal.classList.add('flex');
     }
@@ -1491,6 +1512,11 @@
       const modal = document.getElementById('profile-settings-modal');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+      if (document.body.classList.contains('profile-settings-open')) {
+        document.body.classList.remove('profile-settings-open');
+        document.body.style.removeProperty('--profile-settings-scroll-y');
+        requestAnimationFrame(() => window.scrollTo(0, profileSettingsScrollY));
+      }
     }
 
     let cropState = null;
@@ -3200,7 +3226,7 @@
       }
     };
   </script>
-  <script src="/cloud-account.js"></script>
+  <script src="/cloud-account.js?v=20261013-1" defer></script>
   <div id="cloud-auth-gate" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-white/95 dark:bg-neutral-950/95 backdrop-blur-md p-4">
     <div class="w-full max-w-md rounded-3xl border border-pink-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-6 sm:p-8 shadow-2xl">
       <div class="text-center mb-6"><div class="text-3xl text-pink-500">♥</div><h1 class="mt-2 text-2xl font-display font-extrabold text-neutral-900 dark:text-white">Kho riêng của bạn</h1><p class="mt-2 text-sm text-neutral-500 dark:text-neutral-300">Đăng nhập để dùng ảnh và nhạc cá nhân trên các thiết bị của bạn.</p></div>

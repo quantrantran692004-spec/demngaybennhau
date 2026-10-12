@@ -18,6 +18,7 @@
   const migrationToggle = document.getElementById('cloud-import-local');
   const accountLabel = document.getElementById('cloud-account-label');
   const accountStatus = document.getElementById('cloud-account-status');
+  const openAuthButton = document.getElementById('cloud-open-auth');
   const signOutButton = document.getElementById('cloud-sign-out');
   let user = null;
   let mode = 'signin';
@@ -192,6 +193,7 @@
     user = session?.user || null;
     if (!user) {
       activeUserId = null;
+      openAuthButton?.classList.remove('hidden');
       signOutButton?.classList.add('hidden');
       openGate();
       if (accountLabel) accountLabel.textContent = 'Chưa đăng nhập';
@@ -200,6 +202,7 @@
     }
     if (activeUserId === user.id) return;
     activeUserId = user.id;
+    openAuthButton?.classList.add('hidden');
     signOutButton?.classList.remove('hidden');
     imagePaths = {};
     closeGate();
@@ -231,11 +234,13 @@
   window.loveCloud = api;
 
   if (!isConfigured) {
+    openAuthButton?.classList.add('hidden');
     setConfiguredStatus('Kho cloud chưa được cấu hình. Dữ liệu hiện tại chỉ lưu trên trình duyệt này.');
     if (accountLabel) accountLabel.textContent = 'Cloud chưa cấu hình';
     return;
   }
   if (!window.supabase?.createClient) {
+    openAuthButton?.classList.add('hidden');
     setConfiguredStatus('Không tải được thư viện đăng nhập cloud. Kiểm tra kết nối mạng rồi tải lại.');
     return;
   }
@@ -243,6 +248,7 @@
   supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
+  openAuthButton?.addEventListener('click', openGate);
   signInButton?.addEventListener('click', () => setMode('signin'));
   signUpButton?.addEventListener('click', () => setMode('signup'));
   form?.addEventListener('submit', async (event) => {
