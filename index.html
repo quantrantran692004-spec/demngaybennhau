@@ -509,6 +509,43 @@
       .garden-counter { top: 22px; left: 22px; }
       .garden-controls { left: 18px; right: 18px; bottom: 18px; justify-content: flex-start; }
     }
+
+    @media (max-width: 640px) {
+      #profile-settings-modal,
+      #image-crop-modal {
+        align-items: flex-start;
+        justify-content: center;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: max(8px, env(safe-area-inset-top)) 10px max(8px, env(safe-area-inset-bottom));
+      }
+
+      #profile-settings-modal > div,
+      #image-crop-modal > div {
+        box-sizing: border-box;
+        min-height: 0;
+        max-height: calc(100vh - 16px);
+        max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+      }
+
+      #profile-settings-modal input:not([type="file"]),
+      #profile-settings-modal textarea,
+      #profile-settings-modal select,
+      #image-crop-modal input,
+      #image-crop-modal select {
+        font-size: 16px !important;
+      }
+
+      #profile-settings-modal button,
+      #image-crop-modal button {
+        min-height: 44px;
+        touch-action: manipulation;
+      }
+    }
   </style>
 </head>
 <body class="selection:bg-pink-500 selection:text-white min-h-screen flex flex-col justify-between relative overflow-x-hidden">
@@ -1639,6 +1676,7 @@
     cropFrame.addEventListener('pointerdown', event => {
       if (!cropState) return;
       cropState.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      try { cropFrame.setPointerCapture(event.pointerId); } catch (_) {}
       if (cropState.pointers.size > 1) {
         cropState.action = 'pinch';
         const points = [...cropState.pointers.values()];
@@ -1653,7 +1691,6 @@
       cropState.startImageX = cropState.x;
       cropState.startImageY = cropState.y;
       cropState.startSelection = { ...cropState.selection };
-      cropFrame.setPointerCapture(event.pointerId);
     });
     cropFrame.addEventListener('pointermove', event => {
       if (!cropState || !cropState.action) return;
