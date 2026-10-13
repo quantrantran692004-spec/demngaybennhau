@@ -510,7 +510,28 @@
       .garden-controls { left: 18px; right: 18px; bottom: 18px; justify-content: flex-start; }
     }
 
+    @media (max-width: 1100px) {
+      header { flex-wrap: wrap; justify-content: space-between; row-gap: 0.35rem; }
+      #quick-nav { display: flex !important; order: 3; flex: 1 0 100%; max-width: 100%; gap: 0.2rem; overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding: 0.1rem 0 0.15rem; }
+      #quick-nav::-webkit-scrollbar { display: none; }
+      #quick-nav a { flex: 0 0 auto; white-space: nowrap; padding: 0.4rem 0.65rem; font-size: 0.68rem; }
+      #header-actions { order: 2; gap: 0.35rem; margin-left: auto; }
+      header > div:first-child { order: 1; }
+      #hero, #timeline, #letters, #memories, #our-corner, #pet, #wishes, #games { scroll-margin-top: 7.5rem; }
+    }
+
     @media (max-width: 640px) {
+      main > :not([hidden]) ~ :not([hidden]) { margin-top: 2.75rem !important; }
+
+      header { border-radius: 1.25rem !important; padding: 0.55rem 0.75rem !important; }
+      #theme-switcher { max-width: 108px; padding-left: 0.4rem; padding-right: 0.4rem; font-size: 11px; }
+      #profile-settings-header { min-width: 36px; min-height: 36px; padding: 0.45rem; }
+
+      #hero { gap: 1.5rem; }
+      #hero > div:first-child { min-width: 0; }
+      #vinyl-disc { width: 10.5rem !important; height: 10.5rem !important; right: 0.35rem !important; }
+      #live-clock { min-width: 0; }
+
       body.mobile-modal-open {
         position: fixed;
         top: calc(0px - var(--mobile-modal-scroll-y, 0px));
@@ -587,7 +608,7 @@
     </div>
 
     <!-- Quick Navigation -->
-    <nav class="hidden md:flex items-center gap-1 text-xs font-semibold">
+    <nav id="quick-nav" class="hidden md:flex items-center gap-1 text-xs font-semibold">
       <a href="#hero" class="px-3 py-1.5 rounded-full hover:bg-pink-500/10 hover:text-pink-600 transition-colors">Trang Chủ</a>
       <a href="#timeline" class="px-3 py-1.5 rounded-full bg-pink-500/10 text-pink-600 font-bold">♥ Đếm Ngày Yêu</a>
       <a href="#letters" class="px-3 py-1.5 rounded-full hover:bg-pink-500/10 hover:text-pink-600 transition-colors">Hộp Thư</a>
@@ -599,15 +620,15 @@
     </nav>
 
     <!-- Header Actions: Mini Now Playing & Theme Switcher -->
-    <div class="flex items-center gap-2">
+    <div id="header-actions" class="flex items-center gap-2">
       <!-- Theme Switcher -->
-      <select onchange="changeTheme(this.value)" class="text-xs px-2.5 py-1.5 rounded-full border border-pink-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-800 text-pink-600 font-semibold focus:outline-none cursor-pointer shadow-sm">
+      <select id="theme-switcher" onchange="changeTheme(this.value)" class="text-xs px-2.5 py-1.5 rounded-full border border-pink-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-800 text-pink-600 font-semibold focus:outline-none cursor-pointer shadow-sm">
         <option value="">🌸 Baby Pink</option>
         <option value="lilac">💜 Lilac Pastel</option>
         <option value="peach">🍑 Sunset Peach</option>
         <option value="cyber">🖤 Cyber Dark</option>
       </select>
-      <button onclick="openProfileSettings()" class="text-xs px-2.5 py-1.5 rounded-full border border-pink-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-800 text-pink-600 font-semibold hover:bg-pink-50 dark:hover:bg-neutral-700 transition-colors shadow-sm" title="Tùy chỉnh không gian">
+      <button id="profile-settings-header" onclick="openProfileSettings()" class="text-xs px-2.5 py-1.5 rounded-full border border-pink-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-800 text-pink-600 font-semibold hover:bg-pink-50 dark:hover:bg-neutral-700 transition-colors shadow-sm" title="Tùy chỉnh không gian">
         ⚙️ <span class="hidden sm:inline">Tùy chỉnh</span>
       </button>
     </div>
