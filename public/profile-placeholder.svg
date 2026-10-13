@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Ảnh đại diện chưa thiết lập">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff5f7"/><stop offset="1" stop-color="#eadcf7"/></linearGradient>
+    <linearGradient id="figure" x1="0" y1="0" x2="0.9" y2="1"><stop stop-color="#e8a8bd"/><stop offset="1" stop-color="#b778aa"/></linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="64" fill="url(#bg)"/>
+  <circle cx="256" cy="244" r="190" fill="#fff" opacity=".34"/>
+  <circle cx="256" cy="192" r="78" fill="url(#figure)"/>
+  <path d="M92 493c12-112 76-177 164-177s152 65 164 177" fill="url(#figure)"/>
+  <path d="M373 96c-22-25-65-12-65 19 0 25 29 43 65 70 36-27 65-45 65-70 0-31-43-44-65-19Z" fill="#fff9fc" stroke="#cf7e9f" stroke-width="8" stroke-linejoin="round" opacity=".94"/>
+  <circle cx="115" cy="136" r="7" fill="#fff" opacity=".82"/><circle cx="404" cy="336" r="6" fill="#fff" opacity=".82"/>
+</svg>

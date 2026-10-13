@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
-  <link href="/friends-chat.css?v=20261013-1" rel="stylesheet">
+  <link href="/friends-chat.css?v=20261013-2" rel="stylesheet">
   
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -673,7 +673,7 @@
         ⚙️ <span class="hidden sm:inline">Tùy chỉnh</span>
       </button>
       <button id="chat-open" type="button" aria-label="Mở tin nhắn riêng" class="relative inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-pink-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-800 px-2.5 text-xs font-semibold text-pink-600 shadow-sm hover:bg-pink-50 dark:hover:bg-neutral-700" title="Tin nhắn riêng">
-        <span aria-hidden="true">💌</span><span class="hidden sm:inline">Tin nhắn</span>
+        <span class="chat-open-mark" aria-hidden="true"><svg class="chat-bubble-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 10H8.75a5.25 5.25 0 0 0-5.25 5.25v6.5A5.25 5.25 0 0 0 8.75 27H10v4l5-4h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".58"/><path d="M14 4.75h13.25a5.25 5.25 0 0 1 5.25 5.25v8.25a5.25 5.25 0 0 1-5.25 5.25h-3.5l-5 4.25V23.5H14a5.25 5.25 0 0 1-5.25-5.25V10A5.25 5.25 0 0 1 14 4.75Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="14.5" r="1.25" fill="currentColor"/><circle cx="20.5" cy="14.5" r="1.25" fill="currentColor"/><circle cx="26" cy="14.5" r="1.25" fill="currentColor"/></svg></span><span class="hidden sm:inline">Tin nhắn</span>
       </button>
     </div>
   </header>
@@ -1333,7 +1333,7 @@
   <!-- MODERN MINIMAL FOOTER -->
   <footer class="text-center py-8 border-t border-pink-200 dark:border-neutral-800 text-xs text-neutral-500 dark:text-neutral-400 space-y-1.5 mt-16 bg-white/40 dark:bg-black/20">
     <div class="heart-pulse text-pink-500 text-xl font-bold">♥</div>
-    <p class="font-semibold text-neutral-800 dark:text-neutral-200">Our Love Space • Dành riêng cho <span id="footer-her-name">huongmuoi</span></p>
+    <p class="font-semibold text-neutral-800 dark:text-neutral-200">Our Love Space • Dành riêng cho <span id="footer-her-name">hai bạn</span></p>
     <p class="text-[11px] text-neutral-400">Made with endless love ✨</p>
   </footer>
 
@@ -1355,10 +1355,10 @@
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label class="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Tên người thương
-              <input id="settings-her-name" class="mt-1.5 w-full rounded-xl border border-pink-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2.5 outline-none focus:ring-2 focus:ring-pink-300" />
+              <input id="settings-her-name" placeholder="Tên người thương" class="mt-1.5 w-full rounded-xl border border-pink-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2.5 outline-none focus:ring-2 focus:ring-pink-300" />
             </label>
             <label class="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Tên của bạn
-              <input id="settings-his-name" class="mt-1.5 w-full rounded-xl border border-pink-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2.5 outline-none focus:ring-2 focus:ring-pink-300" />
+              <input id="settings-his-name" placeholder="Tên của bạn" class="mt-1.5 w-full rounded-xl border border-pink-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2.5 outline-none focus:ring-2 focus:ring-pink-300" />
             </label>
             <label class="text-xs font-semibold text-neutral-600 dark:text-neutral-300 sm:col-span-2">Ngày bắt đầu yêu
               <input id="settings-anniversary" type="date" class="mt-1.5 w-full rounded-xl border border-pink-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2.5 outline-none focus:ring-2 focus:ring-pink-300" />
@@ -1509,12 +1509,14 @@
     }
 
     function applyProfileSettings() {
+      const herName = String(profile.herName || '').trim();
+      const hisName = String(profile.hisName || '').trim();
       const ids = {
-        'profile-her-name': profile.herName,
-        'profile-his-name': profile.hisName,
-        'footer-her-name': profile.herName,
-        'hero-couple-names': profile.herName + ' & ' + profile.hisName,
-        'hero-description': profile.description
+        'profile-her-name': herName || 'Người thương',
+        'profile-his-name': hisName || 'Bạn',
+        'footer-her-name': herName || 'hai bạn',
+        'hero-couple-names': (herName || 'Người thương') + ' & ' + (hisName || 'Bạn'),
+        'hero-description': profile.description || 'Thêm lời giới thiệu riêng của hai bạn trong phần Tùy chỉnh.'
       };
       Object.entries(ids).forEach(([id, value]) => {
         const element = document.getElementById(id);
@@ -1526,11 +1528,11 @@
       const hisImage = document.getElementById('profile-his-image');
       if (herImage) {
         herImage.src = profile.herImage;
-        herImage.alt = profile.herName;
+        herImage.alt = herName || 'Ảnh người thương';
       }
       if (hisImage) {
         hisImage.src = profile.hisImage;
-        hisImage.alt = profile.hisName;
+        hisImage.alt = hisName || 'Ảnh của bạn';
       }
       const backgroundImage = document.getElementById('couple-bg-img');
       const heroImage = document.getElementById('hero-img');
@@ -1583,11 +1585,12 @@
     window.unlockMobilePageScroll = unlockMobilePageScroll;
 
     function openProfileSettings() {
-      document.getElementById('settings-her-name').value = profile.herName;
-      document.getElementById('settings-his-name').value = profile.hisName;
-      document.getElementById('settings-anniversary').value = profile.anniversary;
-      document.getElementById('settings-description').value = profile.description;
-      document.getElementById('settings-garden-name').value = profile.gardenName || defaultProfile.gardenName;
+      const isCloudAccount = Boolean(window.loveCloud?.userId);
+      document.getElementById('settings-her-name').value = profile.herName || '';
+      document.getElementById('settings-his-name').value = profile.hisName || '';
+      document.getElementById('settings-anniversary').value = profile.anniversary || '';
+      document.getElementById('settings-description').value = profile.description || '';
+      document.getElementById('settings-garden-name').value = profile.gardenName || (isCloudAccount ? '' : defaultProfile.gardenName);
       const modal = document.getElementById('profile-settings-modal');
       lockMobilePageScroll();
       modal.classList.remove('hidden');
@@ -1908,13 +1911,14 @@
         const heroImage = croppedImages['settings-hero-image'] || await readImage(document.getElementById('settings-hero-image').files[0]);
         const vinylImage = croppedImages['settings-vinyl-image'] || await readImage(document.getElementById('settings-vinyl-image').files[0]);
         const songImage = croppedImages['settings-song-image'] || await readImage(document.getElementById('settings-song-image').files[0]);
+        const isCloudAccount = Boolean(window.loveCloud?.userId);
         profile = {
           ...profile,
-          herName: document.getElementById('settings-her-name').value.trim() || defaultProfile.herName,
-          hisName: document.getElementById('settings-his-name').value.trim() || defaultProfile.hisName,
-          anniversary: document.getElementById('settings-anniversary').value || defaultProfile.anniversary,
-          description: document.getElementById('settings-description').value.trim() || defaultProfile.description,
-          gardenName: document.getElementById('settings-garden-name').value.trim() || defaultProfile.gardenName,
+          herName: document.getElementById('settings-her-name').value.trim() || (isCloudAccount ? '' : defaultProfile.herName),
+          hisName: document.getElementById('settings-his-name').value.trim() || (isCloudAccount ? '' : defaultProfile.hisName),
+          anniversary: document.getElementById('settings-anniversary').value || (isCloudAccount ? '' : defaultProfile.anniversary),
+          description: document.getElementById('settings-description').value.trim() || (isCloudAccount ? '' : defaultProfile.description),
+          gardenName: document.getElementById('settings-garden-name').value.trim() || (isCloudAccount ? '' : defaultProfile.gardenName),
           herImage: herImage || profile.herImage,
           hisImage: hisImage || profile.hisImage,
           backgroundImage: backgroundImage || profile.backgroundImage,
@@ -1969,7 +1973,18 @@
 
     // 2. Accurate Days Calculation
     function calculateDays() {
-      const start = new Date(profile.anniversary + 'T00:00:00');
+      const gardenDays = document.getElementById('garden-days');
+      const gardenSince = document.getElementById('garden-since');
+      const start = profile.anniversary ? new Date(profile.anniversary + 'T00:00:00') : null;
+      if (!start || Number.isNaN(start.getTime())) {
+        ['calculated-days', 'calc-years', 'calc-months', 'calc-days-sub'].forEach(id => {
+          const element = document.getElementById(id);
+          if (element) element.innerText = '—';
+        });
+        if (gardenDays) gardenDays.innerText = '— NGÀY';
+        if (gardenSince) gardenSince.innerText = 'Thêm ngày bắt đầu trong phần Tùy chỉnh';
+        return;
+      }
       const now = new Date();
       const diffTime = now - start;
       const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
@@ -1992,8 +2007,6 @@
       document.getElementById('calc-years').innerText = years >= 0 ? years : 0;
       document.getElementById('calc-months').innerText = months >= 0 ? months : 0;
       document.getElementById('calc-days-sub').innerText = days >= 0 ? days : 0;
-      const gardenDays = document.getElementById('garden-days');
-      const gardenSince = document.getElementById('garden-since');
       if (gardenDays) gardenDays.innerText = (totalDays > 0 ? totalDays : 1) + ' NGÀY';
       if (gardenSince) gardenSince.innerText = 'Bắt đầu từ ' + start.toLocaleDateString('vi-VN');
     }
@@ -3285,6 +3298,20 @@
     })();
     window.LoveSpaceApp = {
       getDefaultProfile: () => ({ ...defaultProfile }),
+      getFreshAccountProfile: () => ({
+        ...defaultProfile,
+        herName: '',
+        hisName: '',
+        anniversary: '',
+        description: '',
+        gardenName: '',
+        herImage: '/profile-placeholder.svg',
+        hisImage: '/profile-placeholder.svg',
+        backgroundImage: '/couple-placeholder.svg',
+        heroImage: '/couple-placeholder.svg',
+        vinylImage: '/album-placeholder.svg',
+        songImage: '/album-placeholder.svg'
+      }),
       getInitialProfile: () => {
         try {
           const saved = JSON.parse(localStorage.getItem(PROFILE_STORAGE_KEY) || 'null');
@@ -3308,13 +3335,13 @@
       }
     };
   </script>
-  <script src="/cloud-account.js?v=20261013-3" defer></script>
-  <script src="/friends-chat.js?v=20261013-1" defer></script>
+  <script src="/cloud-account.js?v=20261013-4" defer></script>
+  <script src="/friends-chat.js?v=20261013-2" defer></script>
   <div id="cloud-auth-gate" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-white/95 dark:bg-neutral-950/95 backdrop-blur-md p-4">
     <div class="w-full max-w-md rounded-3xl border border-pink-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-6 sm:p-8 shadow-2xl">
       <div class="text-center mb-6"><div class="text-3xl text-pink-500">♥</div><h1 class="mt-2 text-2xl font-display font-extrabold text-neutral-900 dark:text-white">Kho riêng của bạn</h1><p class="mt-2 text-sm text-neutral-500 dark:text-neutral-300">Đăng nhập để dùng ảnh và nhạc cá nhân trên các thiết bị của bạn.</p></div>
       <div class="grid grid-cols-2 gap-2"><button id="cloud-sign-in" type="button" class="rounded-xl border border-pink-200 px-3 py-2.5 text-sm font-bold text-pink-600">Đăng nhập</button><button id="cloud-sign-up" type="button" class="rounded-xl border border-pink-200 px-3 py-2.5 text-sm font-bold text-pink-600">Tạo tài khoản</button></div>
-      <form id="cloud-auth-form" class="mt-4 space-y-3"><label class="block text-sm font-semibold text-neutral-700 dark:text-neutral-200">Email<input id="cloud-auth-email" type="email" autocomplete="email" required class="mt-1 w-full rounded-xl border border-pink-200 bg-white px-3 py-3 text-base text-neutral-900 outline-none focus:ring-2 focus:ring-pink-300" /></label><label class="block text-sm font-semibold text-neutral-700 dark:text-neutral-200">Mật khẩu<input id="cloud-auth-password" type="password" autocomplete="current-password" minlength="8" required class="mt-1 w-full rounded-xl border border-pink-200 bg-white px-3 py-3 text-base text-neutral-900 outline-none focus:ring-2 focus:ring-pink-300" /></label><label class="flex items-start gap-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-300"><input id="cloud-import-local" type="checkbox" checked class="mt-0.5 accent-pink-500" /><span>Chép cài đặt cũ trên trình duyệt này vào tài khoản nếu đây là lần đầu đăng nhập.</span></label><button id="cloud-auth-submit" type="submit" class="btn-gradient w-full rounded-xl px-4 py-3 text-sm font-bold text-white">Đăng nhập</button><p id="cloud-auth-message" role="status" aria-live="polite" class="mt-3 min-h-5 text-sm text-pink-600"></p></form>
+      <form id="cloud-auth-form" class="mt-4 space-y-3"><label class="block text-sm font-semibold text-neutral-700 dark:text-neutral-200">Email<input id="cloud-auth-email" type="email" autocomplete="email" required class="mt-1 w-full rounded-xl border border-pink-200 bg-white px-3 py-3 text-base text-neutral-900 outline-none focus:ring-2 focus:ring-pink-300" /></label><label class="block text-sm font-semibold text-neutral-700 dark:text-neutral-200">Mật khẩu<input id="cloud-auth-password" type="password" autocomplete="current-password" minlength="8" required class="mt-1 w-full rounded-xl border border-pink-200 bg-white px-3 py-3 text-base text-neutral-900 outline-none focus:ring-2 focus:ring-pink-300" /></label><label class="flex items-start gap-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-300"><input id="cloud-import-local" type="checkbox" class="mt-0.5 accent-pink-500" /><span>Chỉ tích chọn nếu muốn nhập cài đặt khách cũ trên thiết bị này; tài khoản mới mặc định bắt đầu trống.</span></label><button id="cloud-auth-submit" type="submit" class="btn-gradient w-full rounded-xl px-4 py-3 text-sm font-bold text-white">Đăng nhập</button><p id="cloud-auth-message" role="status" aria-live="polite" class="mt-3 min-h-5 text-sm text-pink-600"></p></form>
       <div class="mt-4 border-t border-pink-100 pt-3 dark:border-neutral-700"><p class="mb-2 text-center text-xs text-neutral-500 dark:text-neutral-400">Hoặc tiếp tục với dữ liệu chỉ lưu trên thiết bị này.</p><button id="cloud-continue-guest" type="button" class="w-full rounded-xl border border-pink-200 px-4 py-3 text-sm font-bold text-pink-600">Tiếp tục không đăng nhập</button></div>
       <p class="mt-4 text-center text-[11px] text-neutral-400">Mỗi tài khoản có dữ liệu riêng. Không chia sẻ mật khẩu với người khác.</p>
     </div>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Ảnh album chưa được thêm">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8dce7"/><stop offset="1" stop-color="#d8cae8"/></linearGradient>
+    <linearGradient id="disc" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#332934"/><stop offset="1" stop-color="#17151c"/></linearGradient>
+    <radialGradient id="label"><stop stop-color="#ffeff5"/><stop offset="1" stop-color="#dc8cab"/></radialGradient>
+  </defs>
+  <rect width="600" height="600" rx="48" fill="url(#bg)"/>
+  <circle cx="300" cy="300" r="220" fill="url(#disc)"/>
+  <circle cx="300" cy="300" r="190" fill="none" stroke="#75606f" stroke-width="2" opacity=".56"/>
+  <circle cx="300" cy="300" r="158" fill="none" stroke="#75606f" stroke-width="2" opacity=".42"/>
+  <circle cx="300" cy="300" r="126" fill="none" stroke="#75606f" stroke-width="2" opacity=".32"/>
+  <circle cx="300" cy="300" r="92" fill="url(#label)"/>
+  <path d="M300 269c-11-13-33-7-33 10 0 13 15 22 33 36 18-14 33-23 33-36 0-17-22-23-33-10Z" fill="none" stroke="#9d486c" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="300" cy="300" r="7" fill="#694254"/><path d="M136 173c25-36 60-61 101-75" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" opacity=".4"/>
+</svg>

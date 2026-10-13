@@ -17,6 +17,7 @@
   const signUpButton = document.getElementById('cloud-sign-up');
   const continueGuestButton = document.getElementById('cloud-continue-guest');
   const migrationToggle = document.getElementById('cloud-import-local');
+  if (migrationToggle) migrationToggle.checked = false;
   const accountLabel = document.getElementById('cloud-account-label');
   const accountStatus = document.getElementById('cloud-account-status');
   const openAuthButton = document.getElementById('cloud-open-auth');
@@ -138,7 +139,7 @@
       return;
     }
 
-    let firstProfile = window.LoveSpaceApp.getDefaultProfile();
+    let firstProfile = window.LoveSpaceApp.getFreshAccountProfile?.() || window.LoveSpaceApp.getDefaultProfile();
     if (migrationToggle?.checked) {
       try {
         const localProfile = JSON.parse(localStorage.getItem('our_love_space_profile_v1') || 'null');
@@ -229,12 +230,12 @@
     openAuthButton?.classList.add('hidden');
     signOutButton?.classList.remove('hidden');
     imagePaths = {};
-    closeGate();
     if (accountLabel) accountLabel.textContent = user.email || 'Tài khoản đã đăng nhập';
     setConfiguredStatus('Đang tải dữ liệu riêng của tài khoản…');
     try {
       await loadOrCreateProfile();
       await restoreSongs();
+      closeGate();
       setConfiguredStatus('Ảnh và nhạc được đồng bộ riêng với tài khoản này.');
     } catch (error) {
       console.error('Không thể tải dữ liệu cloud:', error);

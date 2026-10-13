@@ -5,11 +5,12 @@
   const MAX_VOICE_BYTES = 10 * 1024 * 1024;
   const MAX_RECORD_SECONDS = 90;
   const $ = (id) => document.getElementById(id);
+  const CHAT_BUBBLE_ICON = `<svg class="chat-bubble-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false"><path d="M13 10H8.75a5.25 5.25 0 0 0-5.25 5.25v6.5A5.25 5.25 0 0 0 8.75 27H10v4l5-4h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".58"/><path d="M14 4.75h13.25a5.25 5.25 0 0 1 5.25 5.25v8.25a5.25 5.25 0 0 1-5.25 5.25h-3.5l-5 4.25V23.5H14a5.25 5.25 0 0 1-5.25-5.25V10A5.25 5.25 0 0 1 14 4.75Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="14.5" r="1.25" fill="currentColor"/><circle cx="20.5" cy="14.5" r="1.25" fill="currentColor"/><circle cx="26" cy="14.5" r="1.25" fill="currentColor"/></svg>`;
   const shellMarkup = `
     <div id="chat-shell" aria-hidden="true">
       <section class="chat-window" role="dialog" aria-modal="true" aria-labelledby="chat-title">
         <header class="chat-header">
-          <div><div class="chat-header-kicker">Her Private World · Kết nối riêng tư</div><h2 id="chat-title">Tin nhắn riêng</h2></div>
+          <div class="chat-header-brand"><span class="chat-header-mark" aria-hidden="true">${CHAT_BUBBLE_ICON}</span><div><div class="chat-header-kicker">Her Private World · Kết nối riêng tư</div><h2 id="chat-title">Tin nhắn riêng</h2></div></div>
           <button id="chat-close" class="chat-close" type="button" aria-label="Đóng tin nhắn">×</button>
         </header>
         <div class="chat-workspace">
@@ -65,7 +66,7 @@
             <div id="chat-thread-content" class="chat-hidden" style="display:flex;min-height:0;flex:1;flex-direction:column">
               <header class="chat-thread-header">
                 <button id="chat-back" class="chat-back" type="button" aria-label="Quay lại danh sách bạn bè">‹</button>
-                <span class="chat-contact-avatar" aria-hidden="true">💌</span>
+                <span class="chat-contact-avatar" aria-hidden="true">${CHAT_BUBBLE_ICON}</span>
                 <div style="min-width:0"><h3 id="chat-thread-name" class="chat-thread-name">Bạn</h3><p id="chat-thread-hint" class="chat-thread-hint">Cuộc trò chuyện riêng 1–1</p></div>
               </header>
               <div id="chat-messages" class="chat-messages" aria-live="polite"><div class="chat-list-empty">Đang tải tin nhắn…</div></div>
@@ -301,7 +302,7 @@
         button.className = `chat-contact${activeFriend?.id === friend.id ? ' is-active' : ''}`;
         const avatar = document.createElement('span');
         avatar.className = 'chat-contact-avatar';
-        avatar.textContent = '💌';
+        avatar.innerHTML = CHAT_BUBBLE_ICON;
         const detail = document.createElement('span');
         detail.style.minWidth = '0';
         const name = document.createElement('span');
