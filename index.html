@@ -524,6 +524,8 @@
       main > :not([hidden]) ~ :not([hidden]) { margin-top: 2.75rem !important; }
 
       header { border-radius: 1.25rem !important; padding: 0.55rem 0.75rem !important; }
+      #quick-nav { scroll-snap-type: x proximity; }
+      #quick-nav a { min-height: 44px; display: inline-flex; align-items: center; scroll-snap-align: start; touch-action: manipulation; }
       #theme-switcher { max-width: 108px; padding-left: 0.4rem; padding-right: 0.4rem; font-size: 11px; }
       #profile-settings-header { min-width: 36px; min-height: 36px; padding: 0.45rem; }
 
@@ -581,6 +583,14 @@
         min-height: 44px;
         touch-action: manipulation;
       }
+    }
+
+    @media (max-width: 360px) {
+      header { width: calc(100% - 12px) !important; padding: 0.45rem 0.5rem !important; }
+      header > div:first-child { gap: 0.35rem; }
+      #header-mini-vinyl { width: 28px; height: 28px; }
+      #header-actions { gap: 0.25rem; }
+      #theme-switcher { max-width: 96px; }
     }
   </style>
 </head>
