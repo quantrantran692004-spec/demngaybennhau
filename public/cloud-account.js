@@ -247,6 +247,7 @@
 
   const api = {
     isConfigured,
+    get client() { return supabaseClient; },
     get userId() { return user?.id || null; },
     async saveProfile(profile) {
       if (user) await saveProfile(profile);
