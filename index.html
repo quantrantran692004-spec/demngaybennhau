@@ -2499,6 +2499,15 @@
       const list = document.getElementById('uploaded-song-list');
       if (list) list.classList.toggle('hidden');
     }
+    document.addEventListener('click', event => {
+      const target = event.target;
+      const list = document.getElementById('uploaded-song-list');
+      const trigger = target && target.closest ? target.closest('[onclick=\"toggleUploadedSongList()\"]') : null;
+      if (list && !list.contains(target) && !trigger) {
+        list.classList.add('hidden');
+        list.querySelectorAll('.song-more-menu').forEach(menu => menu.classList.add('hidden'));
+      }
+    });
 
     function selectUploadedSong(songIndex) {
       if (!Number.isInteger(songIndex) || !songs[songIndex]) {
