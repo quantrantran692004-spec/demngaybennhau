@@ -6,12 +6,19 @@
   <title>Our Love Space — Thế Giới Tình Yêu Hiện Đại Của Hai Đứa</title>
   <meta name="supabase-url" content="%VITE_SUPABASE_URL%">
   <meta name="supabase-anon-key" content="%VITE_SUPABASE_ANON_KEY%">
+  <meta name="theme-color" content="#fff5f7">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Love Space">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="/pwa-icon-180.png">
   
   <!-- Google Fonts: Modern Clean Geometric Sans & Sweet Accent -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
-  <link href="/friends-chat.css?v=20261014-2" rel="stylesheet">
+  <link href="/friends-chat.css?v=20261014-3" rel="stylesheet">
+  <link href="/pwa-install.css?v=20261014-1" rel="stylesheet">
   
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -1348,6 +1355,14 @@
         <button aria-label="Đóng tùy chỉnh" onclick="closeProfileSettings()" class="w-10 h-10 rounded-full bg-pink-50 dark:bg-neutral-800 text-pink-500 text-xl hover:bg-pink-100 transition-colors">×</button>
       </div>
       <div class="space-y-5">
+        <section id="pwa-install-card" class="pwa-install-card" hidden>
+          <div class="pwa-install-row">
+            <span class="pwa-install-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="3"></rect><path d="M12 8v7m-3.5-3.5h7"></path></svg></span>
+            <div class="pwa-install-copy"><h3>Thêm Love Space ra màn hình chính</h3><p>Mở nhanh như ứng dụng, không cần tìm lại đường link.</p></div>
+            <button id="pwa-install-button" class="pwa-install-action" type="button">Thêm ngay</button>
+          </div>
+          <p id="pwa-install-help" class="pwa-install-help" role="status" hidden></p>
+        </section>
         <section class="rounded-2xl border border-pink-100 dark:border-neutral-700 bg-pink-50/40 dark:bg-neutral-800/50 p-4">
           <div class="flex items-center gap-3 mb-4">
             <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-pink-500 text-white">♥</span>
@@ -3336,7 +3351,8 @@
 	  };
 	</script>
 		<script src="/cloud-account.js?v=20261013-4" defer></script>
-		<script src="/friends-chat.js?v=20261014-1" defer></script>
+		<script src="/friends-chat.js?v=20261014-2" defer></script>
+		<script src="/pwa-install.js?v=20261014-1" defer></script>
 		<div id="cloud-auth-gate" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-white/95 dark:bg-neutral-950/95 backdrop-blur-md p-4">
     <div class="w-full max-w-md rounded-3xl border border-pink-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-6 sm:p-8 shadow-2xl">
       <div class="text-center mb-6"><div class="text-3xl text-pink-500">♥</div><h1 class="mt-2 text-2xl font-display font-extrabold text-neutral-900 dark:text-white">Kho riêng của bạn</h1><p class="mt-2 text-sm text-neutral-500 dark:text-neutral-300">Đăng nhập để dùng ảnh và nhạc cá nhân trên các thiết bị của bạn.</p></div>

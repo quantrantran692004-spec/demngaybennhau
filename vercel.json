@@ -44,6 +44,56 @@
           "value": "no-store, max-age=0, must-revalidate"
         }
       ]
+    },
+    {
+      "source": "/pwa-sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" },
+        { "key": "Service-Worker-Allowed", "value": "/" }
+      ]
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" },
+        { "key": "Content-Type", "value": "application/manifest+json; charset=utf-8" }
+      ]
+    },
+    {
+      "source": "/pwa-install.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/pwa-install.css",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/pwa-offline.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/pwa-icon-180.png",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/pwa-icon-192.png",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/pwa-icon-512.png",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }
+      ]
     }
   ]
 }

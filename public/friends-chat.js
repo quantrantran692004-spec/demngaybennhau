@@ -361,7 +361,7 @@
       try {
         const url = new URL(signedUrl, location.origin);
         if (!['https:', 'http:'].includes(url.protocol)) throw new Error('Địa chỉ ảnh không hợp lệ.');
-        messages.style.backgroundImage = `linear-gradient(rgba(255,250,252,.76),rgba(255,250,252,.76)),url("${url.href}")`;
+        messages.style.backgroundImage = `linear-gradient(rgba(255,250,252,.05),rgba(255,250,252,.05)),url("${url.href}")`;
         messages.classList.add('has-background-image');
         $('chat-background-clear').classList.remove('chat-hidden');
       } catch {
