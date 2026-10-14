@@ -4,6 +4,8 @@
   const STICKERS = ['💖', '💕', '🥰', '🐻', '🐱', '🌸', '🧸', '😽', '😘', '🥹', '😍', '❤️‍🔥', '🎀', '🍓', '💌', '✨'];
   const MAX_VOICE_BYTES = 10 * 1024 * 1024;
   const MAX_RECORD_SECONDS = 90;
+  const MAX_BACKGROUND_SOURCE_BYTES = 20 * 1024 * 1024;
+  const MAX_BACKGROUND_BYTES = 5 * 1024 * 1024;
   const CHAT_THEMES = [
     { id: 'rose', label: 'Hồng phấn' },
     { id: 'lavender', label: 'Tím sương' },
@@ -17,7 +19,7 @@
     <div id="chat-shell" aria-hidden="true">
       <section class="chat-window" role="dialog" aria-modal="true" aria-labelledby="chat-title">
         <header class="chat-header">
-          <div class="chat-header-brand"><span class="chat-header-mark" aria-hidden="true">${CHAT_BUBBLE_ICON}</span><div><div class="chat-header-kicker">Her Private World · Kết nối riêng tư</div><h2 id="chat-title">Tin nhắn riêng</h2></div></div>
+          <div class="chat-header-brand"><span class="chat-header-mark" aria-hidden="true">${CHAT_BUBBLE_ICON}</span><div><div class="chat-header-kicker">Her Private World · Kết nối riêng tư</div><h2 id="chat-title">Tin nhắn</h2></div></div>
           <button id="chat-close" class="chat-close" type="button" aria-label="Đóng tin nhắn">×</button>
         </header>
         <div class="chat-workspace">
@@ -27,42 +29,46 @@
               Đăng nhập để kết bạn và trò chuyện riêng tư.
               <button id="chat-login-open" class="chat-btn chat-btn-primary" type="button" style="width:100%;margin-top:.75rem">Đăng nhập / tạo tài khoản</button>
             </div>
-            <div id="chat-account-area" class="chat-hidden">
-              <details class="chat-connect-tools">
-                <summary><span class="chat-add-symbol" aria-hidden="true">＋</span><span>Kết bạn & cài đặt</span><span class="chat-summary-chevron" aria-hidden="true">⌄</span></summary>
-                <div class="chat-connect-content">
-                  <section class="chat-profile-strip" aria-label="Hồ sơ chat">
-                    <span class="chat-profile-avatar" aria-hidden="true">${CHAT_BUBBLE_ICON}</span>
-                    <form id="chat-name-form" class="chat-profile-form">
-                      <label class="chat-profile-label" for="chat-name-input">Tên hiển thị</label>
-                      <div class="chat-code-row"><input id="chat-name-input" class="chat-field" maxlength="40" placeholder="Tên bạn bè sẽ thấy" aria-label="Tên bạn bè sẽ nhìn thấy"><button class="chat-btn chat-name-save" type="submit">Lưu</button></div>
-                      <p id="chat-name-status" class="chat-status" role="status"></p>
-                    </form>
-                  </section>
-                  <div class="chat-own-code-row"><div><span class="chat-mini-label">Mã kết bạn của bạn</span><code id="chat-own-code" class="chat-code-value">Đang tải…</code></div>
-                    <button id="chat-share-code" class="chat-btn chat-btn-icon" type="button" aria-label="Chia sẻ mã kết bạn" title="Chia sẻ mã">↗</button>
-                  </div>
-                  <p class="chat-help">Chia sẻ mã hoặc nhập mã của bạn bè. Cần chấp nhận lời mời trước khi nhắn tin.</p>
-                  <form id="chat-add-friend-form" class="chat-add-form">
-                    <input id="chat-friend-code" class="chat-field" maxlength="10" autocomplete="off" autocapitalize="characters" placeholder="Nhập mã kết bạn" aria-label="Mã kết bạn">
-                    <button id="chat-send-request" class="chat-btn chat-btn-primary" type="submit">Gửi lời mời</button>
-                  </form>
-                  <p id="chat-add-status" class="chat-status" role="status"></p>
-                </div>
-              </details>
-
-              <section class="chat-inbox-section chat-requests-section">
-                <div class="chat-section-heading"><p class="chat-sidebar-title">Lời mời</p><span class="chat-section-count" id="chat-request-count">0</span></div>
-                <div id="chat-incoming-list" class="chat-list"><div class="chat-list-empty">Chưa có lời mời mới.</div></div>
-                <div id="chat-outgoing-list" class="chat-list"></div>
-              </section>
-
-              <section class="chat-inbox-section chat-friends-section">
-                <div class="chat-section-heading"><p class="chat-sidebar-title">Tin nhắn</p><span class="chat-section-count" id="chat-friend-count">0</span></div>
-                <label class="chat-friend-search"><span aria-hidden="true">⌕</span><input id="chat-friend-search" type="search" autocomplete="off" placeholder="Tìm bạn bè" aria-label="Tìm bạn bè trong danh sách"></label>
-                <div id="chat-friends-list" class="chat-list"><div class="chat-list-empty">Bạn chưa kết bạn với ai.</div></div>
-              </section>
+        <div id="chat-account-area" class="chat-hidden">
+          <div class="chat-inbox-top">
+            <div class="chat-inbox-title-row">
+              <div><span class="chat-inbox-eyebrow">HER PRIVATE WORLD</span><h3 class="chat-inbox-title">Trò chuyện</h3></div>
+              <div class="chat-inbox-actions">
+                <button id="chat-open-connect" class="chat-inbox-action" type="button" aria-label="Kết bạn mới"><span aria-hidden="true">＋</span><span>Kết bạn</span></button>
+                <details id="chat-requests-details" class="chat-requests-details">
+                  <summary class="chat-request-toggle" aria-label="Mở lời mời kết bạn"><span>Lời mời</span><span id="chat-request-count" class="chat-section-count">0</span></summary>
+                  <div class="chat-request-popover"><p class="chat-request-group-label">Yêu cầu đến</p><div id="chat-incoming-list" class="chat-list"><div class="chat-list-empty">Chưa có lời mời mới.</div></div><p class="chat-request-group-label">Đã gửi</p><div id="chat-outgoing-list" class="chat-list"></div></div>
+                </details>
+              </div>
             </div>
+            <label class="chat-friend-search"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><input id="chat-friend-search" type="search" autocomplete="off" placeholder="Tìm bạn bè hoặc tin nhắn" aria-label="Tìm bạn bè hoặc tin nhắn"></label>
+            <p id="chat-inbox-status" class="chat-status" role="status"></p>
+            <div id="chat-quick-wrap" class="chat-quick-wrap"><div class="chat-quick-heading"><span>BẠN BÈ</span><span id="chat-quick-count"></span></div><div id="chat-quick-friends" class="chat-quick-friends"></div></div>
+          </div>
+
+          <section class="chat-inbox-section chat-friends-section">
+            <div class="chat-section-heading"><p class="chat-sidebar-title">Hộp thư</p><span class="chat-section-count" id="chat-friend-count">0</span></div>
+            <div id="chat-friends-list" class="chat-list"><div class="chat-list-empty">Bạn chưa kết bạn với ai. Chọn “Kết bạn” để bắt đầu.</div></div>
+          </section>
+
+          <details id="chat-connect-tools" class="chat-connect-tools">
+            <summary><span class="chat-add-symbol" aria-hidden="true">＋</span><span>Mã kết bạn & hồ sơ chat</span><span class="chat-summary-chevron" aria-hidden="true">⌄</span></summary>
+            <div class="chat-connect-content">
+              <section class="chat-profile-strip" aria-label="Hồ sơ chat">
+                <span class="chat-profile-avatar" aria-hidden="true">${CHAT_BUBBLE_ICON}</span>
+                <form id="chat-name-form" class="chat-profile-form">
+                  <label class="chat-profile-label" for="chat-name-input">Tên hiển thị</label>
+                  <div class="chat-code-row"><input id="chat-name-input" class="chat-field" maxlength="40" placeholder="Tên bạn bè sẽ thấy" aria-label="Tên bạn bè sẽ nhìn thấy"><button class="chat-btn chat-name-save" type="submit">Lưu</button></div>
+                  <p id="chat-name-status" class="chat-status" role="status"></p>
+                </form>
+              </section>
+              <div class="chat-own-code-row"><div><span class="chat-mini-label">Mã kết bạn của bạn</span><code id="chat-own-code" class="chat-code-value">Đang tải…</code></div><button id="chat-share-code" class="chat-btn chat-btn-icon" type="button" aria-label="Chia sẻ mã kết bạn" title="Chia sẻ mã">↗</button></div>
+              <p class="chat-help">Chia sẻ mã hoặc nhập mã của bạn bè. Cần chấp nhận lời mời trước khi nhắn tin.</p>
+              <form id="chat-add-friend-form" class="chat-add-form"><input id="chat-friend-code" class="chat-field" maxlength="10" autocomplete="off" autocapitalize="characters" placeholder="Nhập mã kết bạn" aria-label="Mã kết bạn"><button id="chat-send-request" class="chat-btn chat-btn-primary" type="submit">Gửi lời mời</button></form>
+              <p id="chat-add-status" class="chat-status" role="status"></p>
+            </div>
+          </details>
+        </div>
           </aside>
 
           <main id="chat-thread" class="chat-thread" aria-label="Cuộc trò chuyện">
@@ -74,7 +80,7 @@
                 <div class="chat-thread-title-wrap"><h3 id="chat-thread-name" class="chat-thread-name">Bạn</h3><p id="chat-thread-hint" class="chat-thread-hint">Cuộc trò chuyện riêng 1–1</p></div>
                 <details id="chat-theme-menu" class="chat-theme-menu">
                   <summary class="chat-theme-trigger" title="Đổi nền chat" aria-label="Đổi nền trò chuyện"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18h1.25a2.25 2.25 0 0 0 1.6-3.84 1.25 1.25 0 0 1 .88-2.13H18a3 3 0 0 0 3-3c0-4.98-4.03-9.03-9-9.03Z"/><circle cx="7.7" cy="10" r="1"/><circle cx="11" cy="7" r="1"/><circle cx="15.2" cy="8" r="1"/></svg></summary>
-                  <div class="chat-theme-popover"><p class="chat-theme-title">Nền trò chuyện</p><p class="chat-theme-note">Chủ đề này dùng chung cho cả hai.</p>
+                  <div class="chat-theme-popover"><p class="chat-theme-title">Nền trò chuyện</p><p class="chat-theme-note">Nền được chia sẻ cho cả hai. Chọn màu sẽ thay ảnh nền hiện tại.</p>
                     <div class="chat-theme-options">
                       <button class="chat-theme-option" type="button" data-theme="rose" aria-pressed="false"><span class="chat-theme-swatch"></span>Hồng phấn</button>
                       <button class="chat-theme-option" type="button" data-theme="lavender" aria-pressed="false"><span class="chat-theme-swatch"></span>Tím sương</button>
@@ -82,6 +88,8 @@
                       <button class="chat-theme-option" type="button" data-theme="mint" aria-pressed="false"><span class="chat-theme-swatch"></span>Bạc hà</button>
                       <button class="chat-theme-option" type="button" data-theme="sky" aria-pressed="false"><span class="chat-theme-swatch"></span>Trời xanh</button>
                     </div>
+                    <div class="chat-background-tools"><label for="chat-background-input" class="chat-background-pick"><span aria-hidden="true">▧</span><span>Chọn ảnh từ thiết bị</span></label><input id="chat-background-input" class="chat-hidden" type="file" accept="image/jpeg,image/png,image/webp"><button id="chat-background-clear" class="chat-background-clear chat-hidden" type="button">Gỡ ảnh nền</button></div>
+                    <p class="chat-background-hint">Ảnh được tự cắt vừa khung, không lặp và có lớp phủ để chữ dễ đọc.</p>
                   </div><p id="chat-theme-status" class="chat-theme-status" role="status"></p>
                 </details>
               </header>
@@ -132,6 +140,7 @@
     let voiceChunks = [];
     let pendingVoice = null;
     let pendingVoicePeer = null;
+    let currentBackgroundPath = null;
 
     function setStatus(id, text, kind = '') {
       const el = $(id);
@@ -169,10 +178,21 @@
     document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && shell.classList.contains('is-open')) closeChat(); });
     $('chat-login-open').addEventListener('click', () => document.getElementById('cloud-open-auth')?.click());
     $('chat-back').addEventListener('click', () => shell.classList.remove('chat-thread-active'));
+    $('chat-open-connect').addEventListener('click', () => {
+      const panel = $('chat-connect-tools');
+      panel.open = !panel.open;
+      if (panel.open) panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    });
     document.querySelectorAll('.chat-theme-option').forEach((button) => {
       button.addEventListener('click', () => saveChatTheme(button.dataset.theme));
     });
     $('chat-friend-search').addEventListener('input', renderFriends);
+    $('chat-background-input').addEventListener('change', (event) => {
+      const file = event.target.files?.[0];
+      event.target.value = '';
+      if (file) saveChatBackgroundImage(file);
+    });
+    $('chat-background-clear').addEventListener('click', clearChatBackground);
 
     for (const sticker of STICKERS) {
       const button = document.createElement('button');
@@ -281,15 +301,18 @@
       if (!client || !userId || !friendId) return;
       const [low, high] = canonicalPair(userId, friendId);
       const { data, error } = await client.from('chat_thread_settings')
-        .select('background_theme').eq('user_low', low).eq('user_high', high).maybeSingle();
+        .select('background_theme,background_image_path').eq('user_low', low).eq('user_high', high).maybeSingle();
       if (activeFriend?.id !== friendId) return;
       if (error) {
         applyChatTheme('rose');
+        currentBackgroundPath = null;
+        applyBackgroundImageUrl(null);
         setStatus('chat-theme-status', 'Cần áp dụng chat_experience_migration.sql để đồng bộ nền.', 'error');
         return;
       }
       setStatus('chat-theme-status', '');
       applyChatTheme(data?.background_theme || 'rose');
+      await loadSharedBackground(data?.background_image_path || null, friendId);
     }
 
     async function saveChatTheme(themeId) {
@@ -297,30 +320,278 @@
       const friendId = activeFriend.id;
       $('chat-theme-menu').open = false;
       const previousTheme = $('chat-thread').dataset.theme || 'rose';
+      const previousPath = currentBackgroundPath;
       const [low, high] = canonicalPair(userId, friendId);
       const themeButtons = [...document.querySelectorAll('.chat-theme-option')];
       themeButtons.forEach((button) => { button.disabled = true; });
+      $('chat-background-input').disabled = true;
       setStatus('chat-theme-status', 'Đang đồng bộ cho cả hai…');
       applyChatTheme(themeId);
       const { error } = await client.from('chat_thread_settings').upsert({
         user_low: low,
         user_high: high,
         background_theme: themeId,
+        background_image_path: null,
         updated_by: userId,
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_low,user_high' });
       themeButtons.forEach((button) => { button.disabled = false; });
+      $('chat-background-input').disabled = false;
       if (activeFriend?.id !== friendId) return;
       if (error) {
         applyChatTheme(previousTheme);
+        await loadSharedBackground(previousPath, friendId);
         setStatus('chat-theme-status', 'Chưa đồng bộ được nền. Hãy kiểm tra migration chat.', 'error');
         return;
       }
+      currentBackgroundPath = null;
+      applyBackgroundImageUrl(null);
+      await removeOwnedBackground(previousPath);
       setStatus('chat-theme-status', 'Đã đổi nền cho cả hai.', 'success');
+    }
+
+    function applyBackgroundImageUrl(signedUrl) {
+      const messages = $('chat-messages');
+      if (!signedUrl) {
+        messages.style.backgroundImage = '';
+        messages.classList.remove('has-background-image');
+        $('chat-background-clear').classList.add('chat-hidden');
+        return;
+      }
+      try {
+        const url = new URL(signedUrl, location.origin);
+        if (!['https:', 'http:'].includes(url.protocol)) throw new Error('Địa chỉ ảnh không hợp lệ.');
+        messages.style.backgroundImage = `linear-gradient(rgba(255,250,252,.76),rgba(255,250,252,.76)),url("${url.href}")`;
+        messages.classList.add('has-background-image');
+        $('chat-background-clear').classList.remove('chat-hidden');
+      } catch {
+        messages.style.backgroundImage = '';
+        messages.classList.remove('has-background-image');
+        $('chat-background-clear').classList.add('chat-hidden');
+      }
+    }
+
+    async function loadSharedBackground(path, friendId) {
+      currentBackgroundPath = path || null;
+      if (!currentBackgroundPath) {
+        applyBackgroundImageUrl(null);
+        return;
+      }
+      const { data, error } = await client.storage.from('chat-backgrounds')
+        .createSignedUrl(currentBackgroundPath, 60 * 60 * 24);
+      if (activeFriend?.id !== friendId || currentBackgroundPath !== path) return;
+      if (error || !data?.signedUrl) {
+        applyBackgroundImageUrl(null);
+        setStatus('chat-theme-status', 'Không tải được ảnh nền. Hãy kiểm tra migration ảnh nền.', 'error');
+        return;
+      }
+      applyBackgroundImageUrl(data.signedUrl);
+    }
+
+    async function removeOwnedBackground(path) {
+      if (!path || !userId || path.split('/')[2] !== userId) return;
+      await client.storage.from('chat-backgrounds').remove([path]);
+    }
+
+    async function prepareChatBackground(file) {
+      const accepted = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!accepted.includes(file.type)) throw new Error('Chọn ảnh JPG, PNG hoặc WebP.');
+      if (!file.size || file.size > MAX_BACKGROUND_SOURCE_BYTES) throw new Error('Ảnh gốc tối đa 20 MB.');
+
+      let source;
+      let dispose = () => {};
+      if (window.createImageBitmap) {
+        try {
+          source = await createImageBitmap(file);
+          dispose = () => source.close?.();
+        } catch { /* Fallback cho trình duyệt không giải mã được createImageBitmap. */ }
+      }
+      if (!source) {
+        const objectUrl = URL.createObjectURL(file);
+        source = await new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = () => reject(new Error('Không đọc được ảnh này.'));
+          image.src = objectUrl;
+        }).finally(() => URL.revokeObjectURL(objectUrl));
+      }
+
+      try {
+        const candidates = [[1800, .84], [1400, .74], [1050, .62]];
+        for (const [maxSide, quality] of candidates) {
+          const scale = Math.min(1, maxSide / Math.max(source.width, source.height));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(source.width * scale));
+          canvas.height = Math.max(1, Math.round(source.height * scale));
+          const context = canvas.getContext('2d');
+          if (!context) throw new Error('Trình duyệt không xử lý được ảnh.');
+          context.fillStyle = '#fff';
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(source, 0, 0, canvas.width, canvas.height);
+          const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality));
+          if (blob && blob.size <= MAX_BACKGROUND_BYTES) return blob;
+        }
+        throw new Error('Ảnh sau khi tối ưu vẫn quá 5 MB. Hãy chọn ảnh khác.');
+      } finally { dispose(); }
+    }
+
+    async function saveChatBackgroundImage(file) {
+      if (!client || !userId || !activeFriend) return setStatus('chat-theme-status', 'Hãy mở một cuộc trò chuyện trước.', 'error');
+      const friendId = activeFriend.id;
+      const previousPath = currentBackgroundPath;
+      const [low, high] = canonicalPair(userId, friendId);
+      const input = $('chat-background-input');
+      const clearButton = $('chat-background-clear');
+      input.disabled = true;
+      clearButton.disabled = true;
+      setStatus('chat-theme-status', 'Đang tối ưu và đồng bộ ảnh nền…');
+      let path = null;
+      try {
+        const blob = await prepareChatBackground(file);
+        path = `${low}/${high}/${userId}/${crypto.randomUUID()}.jpg`;
+        const { error: uploadError } = await client.storage.from('chat-backgrounds').upload(path, blob, {
+          contentType: 'image/jpeg', upsert: false, cacheControl: '3600'
+        });
+        if (uploadError) throw uploadError;
+        const { data: signed, error: signError } = await client.storage.from('chat-backgrounds')
+          .createSignedUrl(path, 60 * 60 * 24);
+        if (signError || !signed?.signedUrl) throw signError || new Error('Không tạo được liên kết ảnh riêng tư.');
+        const { error: saveError } = await client.from('chat_thread_settings').upsert({
+          user_low: low,
+          user_high: high,
+          background_theme: $('chat-thread').dataset.theme || 'rose',
+          background_image_path: path,
+          updated_by: userId,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_low,user_high' });
+        if (saveError) throw saveError;
+        if (activeFriend?.id === friendId) {
+          currentBackgroundPath = path;
+          applyBackgroundImageUrl(signed.signedUrl);
+          setStatus('chat-theme-status', 'Ảnh nền đã đồng bộ cho cả hai.', 'success');
+        }
+        await removeOwnedBackground(previousPath);
+      } catch (error) {
+        if (path) await client.storage.from('chat-backgrounds').remove([path]);
+        if (activeFriend?.id === friendId) setStatus('chat-theme-status', error.message || 'Chưa cập nhật được ảnh nền.', 'error');
+      } finally {
+        input.disabled = false;
+        clearButton.disabled = false;
+      }
+    }
+
+    async function clearChatBackground() {
+      if (!client || !userId || !activeFriend || !currentBackgroundPath) return;
+      const friendId = activeFriend.id;
+      const path = currentBackgroundPath;
+      const [low, high] = canonicalPair(userId, friendId);
+      $('chat-background-clear').disabled = true;
+      setStatus('chat-theme-status', 'Đang gỡ ảnh nền cho cả hai…');
+      const { error } = await client.from('chat_thread_settings').upsert({
+        user_low: low,
+        user_high: high,
+        background_theme: $('chat-thread').dataset.theme || 'rose',
+        background_image_path: null,
+        updated_by: userId,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_low,user_high' });
+      $('chat-background-clear').disabled = false;
+      if (activeFriend?.id !== friendId) return;
+      if (error) return setStatus('chat-theme-status', error.message || 'Chưa gỡ được ảnh nền.', 'error');
+      currentBackgroundPath = null;
+      applyBackgroundImageUrl(null);
+      await removeOwnedBackground(path);
+      setStatus('chat-theme-status', 'Đã gỡ ảnh nền cho cả hai.', 'success');
     }
 
     function displayNameMap(rows) {
       return new Map((rows || []).map((row) => [row.user_id, row.display_name || 'Bạn của mình']));
+    }
+
+    function previewText(row) {
+      if (!row) return 'Bắt đầu trò chuyện với nhau';
+      let text = row.message_type === 'text' ? (row.content || '')
+        : row.message_type === 'sticker' ? `Sticker ${row.content || '💌'}`
+          : row.message_type === 'heart' ? 'Đã gửi một trái tim 💖'
+            : 'Đã gửi tin nhắn thoại';
+      return `${row.sender_id === userId ? 'Bạn: ' : ''}${text}`;
+    }
+
+    function formatInboxTime(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      const now = new Date();
+      if (date.toDateString() === now.toDateString()) return formatTime(value);
+      const yesterday = new Date(now);
+      yesterday.setDate(now.getDate() - 1);
+      if (date.toDateString() === yesterday.toDateString()) return 'Hôm qua';
+      return date.toLocaleDateString('vi-VN', { day: 'numeric', month: 'numeric' });
+    }
+
+    async function loadInboxPreviews(friendIds) {
+      if (!friendIds.length) {
+        setStatus('chat-inbox-status', '');
+        return new Map();
+      }
+      const { data, error } = await client.from('chat_messages')
+        .select('id,user_low,user_high,sender_id,message_type,content,created_at')
+        .or(`user_low.eq.${userId},user_high.eq.${userId}`)
+        .order('created_at', { ascending: false }).limit(400);
+      if (error) {
+        setStatus('chat-inbox-status', 'Chưa tải được nội dung xem trước của tin nhắn.', 'error');
+        return new Map();
+      }
+      const rows = (data || []).filter((row) => friendIds.includes(row.user_low === userId ? row.user_high : row.user_low));
+      const hiddenIds = new Set();
+      const messageIds = rows.map((row) => row.id);
+      const chunks = [];
+      for (let i = 0; i < messageIds.length; i += 80) chunks.push(messageIds.slice(i, i + 80));
+      if (chunks.length) {
+        const hiddenResults = await Promise.all(chunks.map((ids) => client.from('chat_message_hides')
+          .select('message_id').eq('viewer_id', userId).in('message_id', ids)));
+        if (hiddenResults.some((result) => result.error)) {
+          setStatus('chat-inbox-status', 'Không thể tải trạng thái ẩn tin nhắn; phần xem trước đã được ẩn.', 'error');
+          return new Map();
+        }
+        hiddenResults.forEach((result) => (result.data || []).forEach((row) => hiddenIds.add(row.message_id)));
+      }
+      setStatus('chat-inbox-status', '');
+      const previews = new Map();
+      rows.forEach((row) => {
+        if (hiddenIds.has(row.id)) return;
+        const friendId = row.user_low === userId ? row.user_high : row.user_low;
+        if (!previews.has(friendId)) previews.set(friendId, row);
+      });
+      return previews;
+    }
+
+    function renderQuickFriends() {
+      const wrap = $('chat-quick-wrap');
+      const quick = $('chat-quick-friends');
+      if (relationships.length < 2) {
+        wrap.classList.add('chat-hidden');
+        return;
+      }
+      wrap.classList.remove('chat-hidden');
+      $('chat-quick-count').textContent = String(relationships.length);
+      quick.replaceChildren();
+      relationships.slice(0, 8).forEach((friend) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'chat-quick-friend';
+        button.setAttribute('aria-label', `Mở tin nhắn với ${friend.display_name}`);
+        const avatar = document.createElement('span');
+        avatar.className = 'chat-quick-avatar';
+        avatar.textContent = [...(friend.display_name || '♡').trim()][0]?.toLocaleUpperCase('vi') || '♡';
+        const hue = (Number.parseInt((friend.id || '').replace(/-/g, '').slice(0, 6), 16) || 0) % 360;
+        avatar.style.setProperty('--chat-avatar-hue', String(hue));
+        const name = document.createElement('span');
+        name.className = 'chat-quick-name';
+        name.textContent = friend.display_name;
+        button.append(avatar, name);
+        button.addEventListener('click', () => openThread(friend));
+        quick.append(button);
+      });
     }
 
     function renderEmptyList(container, text) {
@@ -346,6 +617,7 @@
       }
       const allFriendships = [...(lowResult.data || []), ...(highResult.data || [])];
       const friendIds = [...new Set(allFriendships.map((row) => row.user_low === userId ? row.user_high : row.user_low))];
+      const friendshipDates = new Map(allFriendships.map((row) => [row.user_low === userId ? row.user_high : row.user_low, row.created_at]));
       const incoming = incomingResult.data || [];
       const outgoing = outgoingResult.data || [];
       $('chat-request-count').textContent = String(incoming.length + outgoing.length);
@@ -361,17 +633,28 @@
         cards = cardResult.data || [];
       }
       const names = displayNameMap(cards);
-      relationships = friendIds.map((id) => ({ id, display_name: names.get(id) || 'Bạn của mình' }));
+      const previews = await loadInboxPreviews(friendIds);
+      relationships = friendIds.map((id) => {
+        const preview = previews.get(id) || null;
+        return {
+          id,
+          display_name: names.get(id) || 'Bạn của mình',
+          preview,
+          preview_text: previewText(preview),
+          friendship_at: friendshipDates.get(id) || null
+        };
+      }).sort((a, b) => new Date(b.preview?.created_at || b.friendship_at || 0) - new Date(a.preview?.created_at || a.friendship_at || 0));
       renderFriends();
       renderRequests(incoming, outgoing, names);
     }
 
     function renderFriends() {
       const list = $('chat-friends-list');
-      $('chat-friend-search').classList.toggle('chat-hidden', relationships.length < 2);
+      $('chat-friend-count').textContent = String(relationships.length);
+      renderQuickFriends();
       if (!relationships.length) return renderEmptyList(list, 'Bạn chưa kết bạn với ai. Chia sẻ mã của bạn hoặc nhập mã của một người bạn.');
       const query = $('chat-friend-search').value.trim().toLocaleLowerCase('vi');
-      const visibleFriends = relationships.filter((friend) => (friend.display_name || '').toLocaleLowerCase('vi').includes(query));
+      const visibleFriends = relationships.filter((friend) => `${friend.display_name || ''} ${friend.preview_text || ''}`.toLocaleLowerCase('vi').includes(query));
       if (!visibleFriends.length) return renderEmptyList(list, 'Không tìm thấy bạn bè phù hợp.');
       list.replaceChildren();
       visibleFriends.forEach((friend) => {
@@ -381,15 +664,29 @@
         const avatar = document.createElement('span');
         avatar.className = 'chat-contact-avatar';
         avatar.textContent = [...(friend.display_name || '♡').trim()][0]?.toLocaleUpperCase('vi') || '♡';
+        const hue = (Number.parseInt((friend.id || '').replace(/-/g, '').slice(0, 6), 16) || 0) % 360;
+        avatar.style.setProperty('--chat-avatar-hue', String(hue));
         const detail = document.createElement('span');
+        detail.className = 'chat-contact-detail';
         detail.style.minWidth = '0';
         const name = document.createElement('span');
         name.className = 'chat-contact-name';
         name.textContent = friend.display_name;
+        const meta = document.createElement('span');
+        meta.className = 'chat-contact-meta';
+        meta.append(name);
+        if (friend.preview?.created_at) {
+          const time = document.createElement('time');
+          time.className = 'chat-contact-time';
+          time.dateTime = friend.preview.created_at;
+          time.textContent = formatInboxTime(friend.preview.created_at);
+          meta.append(time);
+        }
         const sub = document.createElement('span');
         sub.className = 'chat-contact-sub';
-        sub.textContent = 'Bạn bè · nhắn tin riêng';
-        detail.append(name, sub);
+        sub.textContent = friend.preview_text || 'Bắt đầu trò chuyện với nhau';
+        sub.title = sub.textContent;
+        detail.append(meta, sub);
         button.append(avatar, detail);
         button.addEventListener('click', () => openThread(friend));
         list.append(button);
@@ -453,6 +750,9 @@
       $('chat-thread-content').classList.remove('chat-hidden');
       setThreadName(friend);
       applyChatTheme('rose');
+      currentBackgroundPath = null;
+      applyBackgroundImageUrl(null);
+      $('chat-connect-tools').open = false;
       setStatus('chat-theme-status', '');
       $('chat-theme-menu').open = false;
       setStatus('chat-composer-status', '');
@@ -565,6 +865,7 @@
         }
         setStatus('chat-composer-status', 'Đã xóa khỏi phía bạn; người kia vẫn thấy tin nhắn.', 'success');
         await loadMessages();
+        await loadRelationships();
       });
       menu.append(trigger, hideButton);
       if (row.sender_id === userId) rowEl.append(menu, bubble);
@@ -583,22 +884,24 @@
         }, (payload) => {
           if (payload.new?.user_high === high && activeFriend?.id === (payload.new?.user_low === userId ? payload.new?.user_high : payload.new?.user_low)) {
             loadMessages();
+            loadRelationships();
           }
         })
         .on('postgres_changes', {
           event: 'INSERT', schema: 'public', table: 'chat_message_hides', filter: `viewer_id=eq.${userId}`
         }, (payload) => {
-          if (payload.new?.user_low === low && payload.new?.user_high === high && activeFriend?.id === friendId) loadMessages();
+          if (payload.new?.user_low === low && payload.new?.user_high === high && activeFriend?.id === friendId) {
+            loadMessages();
+            loadRelationships();
+          }
         })
         .on('postgres_changes', {
           event: '*', schema: 'public', table: 'chat_thread_settings', filter: `user_low=eq.${low}`
         }, (payload) => {
-          if (payload.new?.user_high === high && activeFriend?.id === friendId) applyChatTheme(payload.new?.background_theme);
-        })
-        .on('postgres_changes', {
-          event: '*', schema: 'public', table: 'chat_thread_settings', filter: `user_high=eq.${high}`
-        }, (payload) => {
-          if (payload.new?.user_low === low && activeFriend?.id === friendId) applyChatTheme(payload.new?.background_theme);
+          if (payload.new?.user_high === high && activeFriend?.id === friendId) {
+            applyChatTheme(payload.new?.background_theme);
+            loadSharedBackground(payload.new?.background_image_path || null, friendId);
+          }
         })
         .subscribe();
     }
@@ -619,6 +922,7 @@
       setStatus('chat-composer-status', '');
       $('chat-sticker-picker').classList.add('chat-hidden');
       await loadMessages();
+      await loadRelationships();
       return true;
     }
 
@@ -759,6 +1063,7 @@
         setVoiceUi('idle');
         setStatus('chat-composer-status', 'Đã gửi tin nhắn thoại.', 'success');
         await loadMessages();
+        await loadRelationships();
       } catch (error) {
         setStatus('chat-composer-status', error.message || 'Không gửi được tin thoại.', 'error');
       } finally {
@@ -801,6 +1106,13 @@
       currentUser = user || null;
       activeFriend = null;
       relationships = [];
+      currentBackgroundPath = null;
+      applyBackgroundImageUrl(null);
+      $('chat-connect-tools').open = false;
+      $('chat-requests-details').open = false;
+      $('chat-friend-search').value = '';
+      $('chat-request-count').textContent = '0';
+      setStatus('chat-inbox-status', '');
       $('chat-thread-content').classList.add('chat-hidden');
       $('chat-empty-thread').classList.remove('chat-hidden');
       shell.classList.remove('chat-thread-active');
