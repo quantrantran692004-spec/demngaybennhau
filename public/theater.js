@@ -223,8 +223,17 @@
   }
   function updateProgressLoop() { if (!state.opened || !state.playing) return; updateProgress(); state.raf = requestAnimationFrame(updateProgressLoop); }
   function seek(value) { const scene = currentScene(); if (!scene) return; const media = document.getElementById('theater-' + scene.type); const percent = Number(value) / 100; if (scene.type === 'video' && media?.duration) { media.currentTime = media.duration * percent; const preview = $('theater-mini-media')?.querySelector('video'); if (preview) preview.currentTime = media.currentTime; state.songVideoTime = media.currentTime; } else if (scene.type === 'image') { state.startedAt = performance.now() - IMAGE_TIME * percent; } updateProgress(); }
-  function showMini() { state.miniEnabled = true; renderMini(); loadState().then(() => renderMini()); }
-  function openMiniOrTheater() { if (!state.miniEnabled) showMini(); else openTheater(); }
+  function showMini() {
+    state.miniEnabled = true;
+    $('theater-mini-card')?.classList.remove('is-hidden');
+    renderMini();
+    loadState().then(() => { $('theater-mini-card')?.classList.remove('is-hidden'); renderMini(); });
+  }
+  function openMiniOrTheater() {
+    const card = $('theater-mini-card');
+    const miniVisible = Boolean(state.miniEnabled && card && !card.classList.contains('is-hidden') && getComputedStyle(card).display !== 'none');
+    if (!miniVisible) showMini(); else openTheater();
+  }
   function openTheater() { const wasPlaying = state.playing; state.opened = true; $('theater-modal').classList.add('is-open'); document.body.classList.add('theater-open'); loadState().then(() => { setSourceAudio(); showScene(state.current, wasPlaying); const panel = $('theater-settings-panel'); if (panel) panel.hidden = true; populateSettings(); updateButtons(); }); }
   function closeTheater() { const keepPlaying = state.playing; state.opened = false; clearTimer(); const stageVideo = $('theater-video'); if (stageVideo) { state.songVideoTime = stageVideo.currentTime || state.songVideoTime; stageVideo.pause(); } $('theater-modal').classList.remove('is-open'); document.body.classList.remove('theater-open'); if (document.fullscreenElement) document.exitFullscreen?.(); renderMini(); }
   function toggleFullscreen() { const shell = $('theater-shell'); if (!document.fullscreenElement) shell.requestFullscreen?.(); else document.exitFullscreen?.(); }
@@ -255,7 +264,7 @@
     if (state.playing) pausePlayback(); else startPlayback(document.getElementById('theater-video'));
     renderMini();
   }
-  function hideInline() { const card = $('theater-mini-card'); if (card) card.classList.add('is-hidden'); }
+  function hideInline() { const card = $('theater-mini-card'); state.miniEnabled = false; if (card) card.classList.add('is-hidden'); }
   function syncSong(song) {
     const previousId = state.selectedSong?.id || state.selectedSong?.storageId || state.selectedSong?.audioUrl;
     state.selectedSong = song || null;
