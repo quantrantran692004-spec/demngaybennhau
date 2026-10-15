@@ -2785,7 +2785,7 @@
       const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
       camera.position.set(8.2, 5.2, 10.4);
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.7));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.outputEncoding = THREE.sRGBEncoding;
@@ -2892,7 +2892,7 @@
       const sun = new THREE.DirectionalLight(0xffc48e, 3.2);
       sun.position.set(-5, 9, 4);
       sun.castShadow = true;
-      sun.shadow.mapSize.set(1024, 1024);
+      sun.shadow.mapSize.set(512, 512);
       scene.add(sun);
 
       const ground = new THREE.Mesh(
@@ -3157,8 +3157,19 @@
       resize();
 
       const clock = new THREE.Clock();
-      function animate() {
+      let gardenIsVisible = true;
+      if ('IntersectionObserver' in window) {
+        gardenIsVisible = false;
+        const gardenVisibilityObserver = new IntersectionObserver(entries => {
+          gardenIsVisible = Boolean(entries[0]?.isIntersecting);
+        }, { threshold: 0.05 });
+        gardenVisibilityObserver.observe(garden);
+      }
+      let lastGardenFrame = 0;
+      function animate(time) {
         requestAnimationFrame(animate);
+        if (!gardenIsVisible || time - lastGardenFrame < 1000 / 12) return;
+        lastGardenFrame = time;
         const elapsed = clock.getElapsedTime();
         orbitVelocity *= 0.92;
         orbit += orbitVelocity;
@@ -3292,7 +3303,19 @@
           line(iso(i * 0.8, -3.3, 0.55), iso((i + 1) * 0.8, -3.3, 0.55), colors.wood, 3 * state.scale);
         }
       };
+      let illustrationIsVisible = true;
+      if ('IntersectionObserver' in window) {
+        illustrationIsVisible = false;
+        const illustrationVisibilityObserver = new IntersectionObserver(entries => {
+          illustrationIsVisible = Boolean(entries[0]?.isIntersecting);
+        }, { threshold: 0.05 });
+        illustrationVisibilityObserver.observe(garden);
+      }
+      let lastIllustrationFrame = 0;
       const draw = (time) => {
+        requestAnimationFrame(draw);
+        if (!illustrationIsVisible || time - lastIllustrationFrame < 1000 / 12) return;
+        lastIllustrationFrame = time;
         const width = garden.clientWidth;
         const height = garden.clientHeight;
         ctx.clearRect(0, 0, width, height);
@@ -3321,7 +3344,6 @@
         }
         const glow = 0.72 + Math.sin(time * 0.002) * 0.16;
         circle(iso(0, 0.15).x + 8 * state.scale, iso(0, 0.15).y - 154 * state.scale, 5 * state.scale, `rgba(255,215,144,${glow})`);
-        requestAnimationFrame(draw);
       };
       resize();
       window.addEventListener('resize', resize);
@@ -3364,7 +3386,11 @@
         stars = Array.from({ length: count }, randomStar);
       };
 
+      let lastGalaxyFrame = 0;
       const draw = (time) => {
+        requestAnimationFrame(draw);
+        if (time - lastGalaxyFrame < 1000 / 12) return;
+        lastGalaxyFrame = time;
         ctx.clearRect(0, 0, width, height);
         if (document.documentElement.dataset.theme === 'cyber') {
           ctx.save();
