@@ -619,8 +619,9 @@
       #hero-vinyl-caption > span:first-child { justify-content: center; font-size: 9px; line-height: 1.2; }
       #hero-vinyl-caption > span:first-child .animate-ping { display: none; }
       #hero-vinyl-caption > span:last-child { display: none; }
-      #hero-music-player { grid-column: 1 / -1; grid-row: 4; width: 100%; max-width: none; padding: 0.85rem; }
-      #hero-actions { grid-column: 1 / -1; grid-row: 5; gap: 0.5rem; }
+      #theater-mini-card { grid-column: 1 / -1; grid-row: 4; }
+      #hero-music-player { grid-column: 1 / -1; grid-row: 5; width: 100%; max-width: none; padding: 0.85rem; }
+      #hero-actions { grid-column: 1 / -1; grid-row: 6; gap: 0.5rem; }
       #hero-actions > a, #hero-actions > button { min-height: 44px; padding: 0.7rem 1rem; font-size: 11px; }
     }
 
@@ -728,6 +729,13 @@
         <p id="hero-description-block" class="text-xs sm:text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed font-normal max-w-lg">
           <span id="hero-description">Bản hòa tấu độc quyền viết riêng cho hai đứa mình. Từng vòng xoay đĩa than lưu giữ kỷ niệm, từng lời ca là giai điệu dịu dàng nhất gửi đến em bé.</span>
         </p>
+          <div id="theater-mini-card" aria-label="Rạp chiếu kỷ niệm">
+            <div id="theater-mini-media" class="theater-mini-media"></div>
+            <div class="theater-mini-overlay"><strong id="theater-mini-title">Kỷ niệm của hai đứa</strong><span>Chạm để mở rạp chiếu</span></div>
+            <button id="theater-mini-open" type="button" class="theater-mini-open">Mở rộng</button>
+            <div class="theater-mini-meta"><span>Khoảnh khắc <b id="theater-mini-count">0/0</b></span><span class="theater-mini-actions"><label>＋ Thêm ảnh/video<input id="theater-media-input" type="file" accept="image/*,video/mp4,video/webm" multiple></label><button type="button" onclick="TheaterApp.open()">Mở rạp chiếu</button></span></div>
+          </div>
+
 
         <!-- SPOTIFY MINI PLAYER CONTROLLER CARD -->
         <div id="hero-music-player" class="p-4 sm:p-4 rounded-3xl ios-glass border border-pink-200 dark:border-neutral-700 shadow-xl space-y-3 max-w-lg">
@@ -761,7 +769,7 @@
             <label class="relative overflow-hidden cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-pink-200 dark:border-neutral-600 text-pink-600 dark:text-pink-300 hover:bg-pink-50 dark:hover:bg-neutral-800 text-[11px] font-bold transition-colors">
               <span class="text-sm leading-none">＋</span>
               <span>Thêm nhạc</span>
-              <input id="music-file-input" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.oga,.aac,.flac,.webm" multiple class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0" onchange="addCustomSong(event)">
+              <input id="music-file-input" type="file" accept="audio/*,.mp3,.mp4,.m4a,.wav,.ogg,.oga,.aac,.flac,.webm" multiple class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0" onchange="addCustomSong(event)">
             </label>
           </div>
           <div class="flex justify-end">
@@ -779,12 +787,6 @@
             </div>
           </div>
 
-          <div id="theater-mini-card" aria-label="Rạp chiếu kỷ niệm">
-            <div id="theater-mini-media" class="theater-mini-media"></div>
-            <div class="theater-mini-overlay"><strong id="theater-mini-title">Kỷ niệm của hai đứa</strong><span>Chạm để mở rạp chiếu</span></div>
-            <button id="theater-mini-open" type="button" class="theater-mini-open">Mở rộng</button>
-            <div class="theater-mini-meta"><span>Khoảnh khắc <b id="theater-mini-count">1/1</b></span><button type="button" onclick="TheaterApp.open()">Xem rạp chiếu</button></div>
-          </div>
           <!-- Progress bar -->
           <div class="space-y-1">
             <div class="w-full bg-black/10 dark:bg-white/10 h-1.5 rounded-full overflow-hidden cursor-pointer" onclick="seekSong(event)">
@@ -2354,6 +2356,7 @@
         id: 'custom-' + Date.now() + '-' + Math.random().toString(36).slice(2),
         title: file.name.replace(/\.[^/.]+$/, '') || 'Bài hát mới',
         artist: 'Nhạc tải lên cá nhân',
+        mediaType: /\.mp4$/i.test(file.name) || file.type === 'video/mp4' ? 'video' : 'audio',
         blob: file
       };
       const db = await openMusicDatabase();
@@ -2370,7 +2373,8 @@
         cover: '',
         audioUrl: URL.createObjectURL(record.blob),
         duration: 0,
-        storageId: record.id
+        storageId: record.id,
+        mediaType: record.mediaType || 'audio'
       };
     }
 
@@ -2395,7 +2399,8 @@
               cover: '',
               audioUrl: URL.createObjectURL(record.blob),
               duration: 0,
-              storageId: record.id
+              storageId: record.id,
+              mediaType: record.mediaType || 'audio'
             });
           }
         });
@@ -2606,6 +2611,7 @@
         audioObj.pause();
         stopSoftChords();
       }
+      window.TheaterApp?.syncPlayback?.(isPlaying);
     }
 
     function updatePlayerUI() {
@@ -2674,6 +2680,7 @@
         updatePlayerUI();
         playCurrentAudio();
       }
+      window.TheaterApp?.syncSong?.({ ...s, isPlaying });
     }
 
     function nextSong() {
@@ -2694,7 +2701,7 @@
 
     function isAudioFile(file) {
       const extension = String(file.name || '').toLowerCase().split('.').pop();
-      return file.type.startsWith('audio/') || ['mp3', 'm4a', 'wav', 'ogg', 'oga', 'aac', 'flac', 'webm'].includes(extension);
+      return file.type.startsWith('audio/') || ['mp3', 'm4a', 'wav', 'ogg', 'oga', 'aac', 'flac', 'webm', 'mp4'].includes(extension);
     }
     function addCustomSong(event) {
       const files = Array.from(event.target.files || []);
@@ -3503,7 +3510,7 @@
   <div id="theater-modal" aria-hidden="true">
     <section id="theater-shell" class="theater-shell" role="dialog" aria-modal="true" aria-labelledby="theater-title">
       <header class="theater-header"><div><h2 id="theater-title">Rạp chiếu kỷ niệm</h2><p>Những khoảnh khắc của hai đứa</p></div><div class="theater-header-actions"><button id="theater-fullscreen" class="theater-icon-btn" type="button" title="Toàn màn hình">⛶</button><button id="theater-close" class="theater-icon-btn" type="button" title="Đóng">×</button></div></header>
-      <div class="theater-body"><main class="theater-main"><div id="theater-stage" class="theater-stage"><div class="theater-empty"><div><b>Rạp chiếu đang trống</b><span>Thêm ảnh hoặc video để bắt đầu câu chuyện của hai đứa.</span></div></div><div class="theater-caption"><strong id="theater-caption-title">Kỷ niệm của hai đứa</strong><p id="theater-caption-text">Thêm ảnh, video và nhạc để tạo bộ phim riêng.</p></div></div><div class="theater-controls"><div class="theater-progress-row"><span id="theater-current-time">0:00</span><input id="theater-progress" class="theater-progress" type="range" min="0" max="100" step="0.1" value="0" aria-label="Tiến trình cảnh"><span id="theater-duration">0:00</span></div><div class="theater-control-row"><button id="theater-prev" class="theater-icon-btn" type="button" title="Cảnh trước">⏮</button><button id="theater-play" class="theater-icon-btn theater-play" type="button" title="Phát">▶</button><button id="theater-next" class="theater-icon-btn" type="button" title="Cảnh sau">⏭</button><span class="theater-control-spacer"></span><span>🔊</span><input id="theater-volume" class="theater-volume" type="range" min="0" max="1" step="0.05" value="1" aria-label="Âm lượng"><audio id="theater-audio" preload="metadata"></audio></div><div class="theater-add-row"><label>＋ Ảnh / MP4<input id="theater-media-input" type="file" accept="image/*,video/mp4,video/webm" multiple></label><label>♫ Nhạc MP3<input id="theater-audio-input" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac" ></label></div></div></main><aside class="theater-scenes"><div class="theater-scenes-title"><span>Các cảnh <small id="theater-scene-index">0/0</small></span><button id="theater-clear" class="theater-icon-btn" type="button" title="Xóa tất cả">⌫</button></div><div id="theater-scene-list" class="theater-scene-list"></div></aside></div>
+      <div class="theater-body"><main class="theater-main"><div id="theater-stage" class="theater-stage"><div class="theater-empty"><div><b>Rạp chiếu đang trống</b><span>Thêm ảnh hoặc video để bắt đầu câu chuyện của hai đứa.</span></div></div><div class="theater-caption"><strong id="theater-caption-title">Kỷ niệm của hai đứa</strong><p id="theater-caption-text">Thêm ảnh, video và nhạc để tạo bộ phim riêng.</p></div></div><div class="theater-controls"><div class="theater-progress-row"><span id="theater-current-time">0:00</span><input id="theater-progress" class="theater-progress" type="range" min="0" max="100" step="0.1" value="0" aria-label="Tiến trình cảnh"><span id="theater-duration">0:00</span></div><div class="theater-control-row"><button id="theater-prev" class="theater-icon-btn" type="button" title="Cảnh trước">⏮</button><button id="theater-play" class="theater-icon-btn theater-play" type="button" title="Phát">▶</button><button id="theater-next" class="theater-icon-btn" type="button" title="Cảnh sau">⏭</button><span class="theater-control-spacer"></span><span>🔊</span><input id="theater-volume" class="theater-volume" type="range" min="0" max="1" step="0.05" value="1" aria-label="Âm lượng"><audio id="theater-audio" preload="metadata"></audio></div><div class="theater-add-row"><span>Chọn nhạc từ playlist ở trên</span></div></div></main><aside class="theater-scenes"><div class="theater-scenes-title"><span>Các cảnh <small id="theater-scene-index">0/0</small></span><button id="theater-clear" class="theater-icon-btn" type="button" title="Xóa tất cả">⌫</button></div><div id="theater-scene-list" class="theater-scene-list"></div></aside></div>
     </section>
   </div>
   <script src="/theater.js?v=20261015-1" defer></script>
