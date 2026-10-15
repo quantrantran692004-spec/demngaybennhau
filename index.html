@@ -2688,10 +2688,6 @@
       const extension = String(file.name || '').toLowerCase().split('.').pop();
       return file.type.startsWith('audio/') || ['mp3', 'm4a', 'wav', 'ogg', 'oga', 'aac', 'flac', 'webm'].includes(extension);
     }
-    function isAudioFile(file) {
-      const extension = String(file.name || '').toLowerCase().split('.').pop();
-      return file.type.startsWith('audio/') || ['mp3', 'm4a', 'wav', 'ogg', 'oga', 'aac', 'flac', 'webm'].includes(extension);
-    }
     function addCustomSong(event) {
       const files = Array.from(event.target.files || []);
       if (!files.length) return;
