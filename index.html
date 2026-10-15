@@ -2402,7 +2402,7 @@
               audioUrl: URL.createObjectURL(record.blob),
               duration: 0,
               storageId: record.id,
-              mediaType: record.mediaType || 'audio'
+              mediaType: record.mediaType || (record.blob?.type?.startsWith('video/') ? 'video' : 'audio')
             });
           }
         });
@@ -2725,18 +2725,21 @@
         return;
       }
       event.target.value = '';
-      showMusicToast('Đang lưu ' + files.length + ' bài nhạc…');
-      Promise.all(files.map(file => saveCustomSong(file))).then(newSongs => {
+      showMusicToast('Đang lưu ' + files.length + ' file…');
+      (async () => {
+        const newSongs = [];
+        for (const file of files) {
+          try { newSongs.push(await saveCustomSong(file)); }
+          catch (error) { console.error('Lưu file thất bại:', file.name, error); showMusicToast('Không tải được file ' + file.name + ': ' + (error?.message || 'lỗi lưu file.')); }
+        }
+        if (!newSongs.length) { showMusicToast('Chưa thêm được file nào. Hãy kiểm tra định dạng và dung lượng.'); return; }
         songs.push(...newSongs);
         persistSongOrder();
         isPlaying = false;
         setSong(songs.length - newSongs.length);
         renderUploadedSongs();
-        showMusicToast('Đã thêm ' + newSongs.length + ' bài nhạc vào playlist.');
-      }).catch(error => {
-        console.error('Lưu nhạc thất bại:', error);
-        showMusicToast(error?.message || 'Không lưu được bài nhạc. Hãy thử lại nhé.');
-      });
+        showMusicToast('Đã thêm ' + newSongs.length + ' file vào playlist.');
+      })();
     }
     renderUploadedSongs();
     restoreCustomSongs();
