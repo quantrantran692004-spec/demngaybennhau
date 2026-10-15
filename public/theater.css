@@ -43,3 +43,5 @@
 }
 
 @media (max-width:700px){#theater-mini-progress-wrap{bottom:3.15rem;left:.5rem;right:.5rem;padding:.28rem .4rem}}
+
+.theater-upload-status{min-height:1rem;margin-top:.45rem;color:#9d174d;font-size:.65rem;font-weight:700}.theater-upload-status.is-error{color:#be123c}
