@@ -194,7 +194,7 @@
   }
   function updateProgressLoop() { if (!state.opened || !state.playing) return; updateProgress(); state.raf = requestAnimationFrame(updateProgressLoop); }
   function seek(value) { const scene = currentScene(); if (!scene) return; const media = document.getElementById('theater-' + scene.type); const percent = Number(value) / 100; if (scene.type === 'video' && media?.duration) { media.currentTime = media.duration * percent; state.songVideoTime = media.currentTime; } else if (scene.type === 'image') { state.startedAt = performance.now() - IMAGE_TIME * percent; } updateProgress(); }
-  function openTheater() { window.TheaterHost?.pauseSong?.(); state.opened = true; state.playing = false; $('theater-modal').classList.add('is-open'); document.body.classList.add('theater-open'); loadState().then(() => { setSourceAudio(); showScene(state.current, false); const panel = $('theater-settings-panel'); if (panel) panel.hidden = true; populateSettings(); updateButtons(); }); }
+  function openTheater() { state.opened = true; state.playing = false; $('theater-modal').classList.add('is-open'); document.body.classList.add('theater-open'); loadState().then(() => { setSourceAudio(); showScene(state.current, false); const panel = $('theater-settings-panel'); if (panel) panel.hidden = true; populateSettings(); updateButtons(); }); }
   function closeTheater() { state.opened = false; pausePlayback(); $('theater-modal').classList.remove('is-open'); document.body.classList.remove('theater-open'); if (document.fullscreenElement) document.exitFullscreen?.(); }
   function toggleFullscreen() { const shell = $('theater-shell'); if (!document.fullscreenElement) shell.requestFullscreen?.(); else document.exitFullscreen?.(); }
   function refreshMusicList() {
@@ -233,6 +233,6 @@
   }
   function syncPlayback(playing) { if (!playing) setVideoLock(false); state.selectedSong = state.selectedSong ? { ...state.selectedSong, isPlaying: playing } : state.selectedSong; renderMini(); }
   function pauseForPlaylist() { pausePlayback(); }
-  window.TheaterApp = { open: openTheater, close: closeTheater, syncSong, syncPlayback, toggleSettings, chooseMusic, setPlaylist, selectAudioSong, pauseMusic, toggleInlineOnly, hideInline, pauseForPlaylist };
+  window.TheaterApp = { open: openTheater, close: closeTheater, syncSong, syncPlayback, toggleSettings, chooseMusic, setPlaylist, selectAudioSong, pauseMusic, toggleInlineOnly, hideInline };
   window.addEventListener('DOMContentLoaded', () => { bind(); loadState(); });
 })();

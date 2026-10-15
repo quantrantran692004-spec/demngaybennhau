@@ -1269,12 +1269,14 @@
         'profile-his-name': hisName || 'Bạn',
         'footer-her-name': herName || 'hai bạn',
         'hero-couple-names': (herName || 'Người thương') + ' & ' + (hisName || 'Bạn'),
-        'hero-description': profile.description || 'Thêm lời giới thiệu riêng của hai bạn trong phần Tùy chỉnh.'
+        'hero-description': String(profile.description || '').trim()
       };
       Object.entries(ids).forEach(([id, value]) => {
         const element = document.getElementById(id);
         if (element) element.innerText = value;
       });
+      const descriptionBlock = document.getElementById('hero-description-block');
+      if (descriptionBlock) descriptionBlock.classList.toggle('hidden', !String(profile.description || '').trim());
       const gardenTitle = document.getElementById('garden-section-title');
       if (gardenTitle) gardenTitle.innerText = profile.gardenName || defaultProfile.gardenName;
       const herImage = document.getElementById('profile-her-image');
@@ -1897,7 +1899,7 @@
       }
     } catch (error) { console.warn('Không thể đọc thứ tự playlist:', error); }
     let currentSongIndex = 0;
-    window.TheaterHost = { getSongs: () => songs, setVideoLock: setMusicLockedByTheater, selectSong: index => setSong(Number(index)), pauseSong: () => { audioObj?.pause(); stopSoftChords(); if (isPlaying) { isPlaying = false; updatePlayerUI(); window.TheaterApp?.syncPlayback?.(false); } }, toggleSong: () => { if (!isPlaying) window.TheaterApp?.pauseForPlaylist?.(); togglePlayMusic(); } };
+    window.TheaterHost = { getSongs: () => songs, setVideoLock: setMusicLockedByTheater, selectSong: index => setSong(Number(index)), pauseSong: () => { audioObj?.pause(); stopSoftChords(); if (isPlaying) { isPlaying = false; updatePlayerUI(); window.TheaterApp?.syncPlayback?.(false); } }, toggleSong: () => togglePlayMusic() };
     let isPlaying = false;
     let musicLockedByTheater = false;
     function setMusicLockedByTheater(locked) {
@@ -2246,7 +2248,6 @@
     function togglePlayMusic() {
       if (musicLockedByTheater) { showMusicToast('Rạp đang phát video. Hãy dừng video trước khi bật thanh nhạc.'); return; }
       const willPlay = !isPlaying;
-      if (willPlay) window.TheaterApp?.pauseForPlaylist?.();
       isPlaying = willPlay;
       updatePlayerUI();
 
@@ -2256,7 +2257,6 @@
         audioObj.pause();
         stopSoftChords();
       }
-      window.TheaterApp?.syncSong?.({ ...songs[currentSongIndex], isPlaying });
     }
 
     function updatePlayerUI() {
@@ -2328,7 +2328,6 @@
       } else {
         updatePlayerUI();
       }
-      window.TheaterApp?.syncSong?.({ ...s, isPlaying });
     }
 
     function nextSong() {
