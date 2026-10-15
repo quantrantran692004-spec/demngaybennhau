@@ -121,7 +121,7 @@
     const audio = $('theater-audio'); if (!audio) return;
     const videoActive = currentScene()?.type === 'video' || state.selectedSong?.mediaType === 'video';
     if (videoActive) { audio.pause(); audio.removeAttribute('src'); return; }
-    const source = state.theaterAudioSong?.mediaType === 'audio' ? state.theaterAudioSong.audioUrl : null;
+    const source = state.theaterAudioSong && state.theaterAudioSong.mediaType !== 'video' ? state.theaterAudioSong.audioUrl : null;
     if (!source) { audio.pause(); audio.removeAttribute('src'); audio.load(); return; }
     if (audio.src !== source) { audio.src = source; audio.load(); }
   }
@@ -146,7 +146,7 @@
     window.TheaterHost?.pauseSong?.();
     state.playing = true; setSourceAudio(); const audio = $('theater-audio');
     if (currentScene().type === 'video') { audio?.pause(); media?.play().catch(() => {}); }
-    else { if (state.theaterAudioSong?.mediaType === 'audio' && audio?.src) audio.play().catch(() => {}); if (state.settings.auto) state.timer = setTimeout(nextScene, Number(state.settings.duration) * 1000); }
+    else { if (state.theaterAudioSong && state.theaterAudioSong.mediaType !== 'video' && audio?.src) audio.play().catch(() => {}); if (state.settings.auto) state.timer = setTimeout(nextScene, Number(state.settings.duration) * 1000); }
     updateButtons(); updateProgressLoop();
   }
   function pausePlayback() { state.playing = false; clearTimer(); stopMediaOnly(); $('theater-audio')?.pause(); updateButtons(); }
@@ -183,7 +183,7 @@
     $('theater-clear')?.addEventListener('click', async () => { if (!confirm('Xóa toàn bộ cảnh trong rạp chiếu?')) return; for (const scene of state.scenes) await dbDelete(scene.id); state.scenes = []; renderAll(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.opened && !document.fullscreenElement) closeTheater(); }); $('theater-modal')?.addEventListener('click', e => { if (e.target.id === 'theater-modal') closeTheater(); });
   }
-  function selectAudioSong(song) { state.theaterAudioSong = song || null; setSourceAudio(); toast(song ? ('Đã chọn nhạc nền rạp: ' + song.title) : 'Rạp sẽ không dùng nhạc nền.'); }
+  function selectAudioSong(song) { state.theaterAudioSong = song ? { ...song, mediaType: song.mediaType || 'audio' } : null; setSourceAudio(); toast(song ? ('Đã chọn nhạc nền rạp: ' + song.title) : 'Rạp sẽ không dùng nhạc nền.'); }
   function setPlaylist(songs) { state.playlist = songs || []; refreshMusicList(); }
   function pauseMusic() { window.TheaterHost?.pauseSong?.(); state.selectedSong = state.selectedSong ? { ...state.selectedSong, isPlaying: false } : state.selectedSong; stopInline(); renderMini(); }
   function hideInline() { const card = $('theater-mini-card'); if (card) card.classList.add('is-hidden'); }
