@@ -3,10 +3,13 @@
   const DB_NAME = 'our_love_theater_db';
   const STORE = 'media';
   const IMAGE_TIME = 6500;
+  const DEFAULT_SETTINGS = { effect: 'kenburns', transition: 'fade', speed: 'normal', duration: 6.5, auto: true };
   const MAX_BYTES = 120 * 1024 * 1024;
   const $ = id => document.getElementById(id);
-  const state = { scenes: [], audio: null, current: 0, playing: false, opened: false, timer: null, raf: 0, startedAt: 0, imageElapsed: 0, objectUrls: new Map(), loaded: false, dragging: null, selectedSong: null, songScene: null, cover: null, inlineTimer: null };
+  const state = { scenes: [], audio: null, current: 0, playing: false, opened: false, timer: null, raf: 0, startedAt: 0, imageElapsed: 0, objectUrls: new Map(), loaded: false, dragging: null, selectedSong: null, songScene: null, cover: null, inlineTimer: null, settings: { ...DEFAULT_SETTINGS }, playlist: [] };
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  function loadSettings() { try { state.settings = { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem('our_love_theater_settings') || '{}') }; } catch (_) {} }
+  function saveSettings() { localStorage.setItem('our_love_theater_settings', JSON.stringify(state.settings)); }
   const toast = text => { const el = document.getElementById('garden-toast'); if (el) { el.textContent = text; el.classList.add('is-visible'); setTimeout(() => el.classList.remove('is-visible'), 2600); } else console.info(text); };
   const openDb = () => new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 1);
@@ -38,6 +41,7 @@
   function clearTimer() { if (state.timer) { clearTimeout(state.timer); state.timer = null; } if (state.raf) cancelAnimationFrame(state.raf); state.raf = 0; }
   function stopMediaOnly() { const video = $('theater-video'); if (video) video.pause(); const audio = $('theater-audio'); if (audio) audio.pause(); }
   async function loadState() {
+    loadSettings();
     if (state.loaded) return;
     try {
       const records = await dbAll();
@@ -77,7 +81,7 @@
     stopInline(); if (!state.selectedSong?.isPlaying || !state.scenes.length) return;
     const scene = currentScene();
     if (scene?.type === 'video') $('theater-mini-media')?.querySelector('video')?.play().catch(() => {});
-    else state.inlineTimer = setTimeout(() => { state.current = (state.current + 1) % state.scenes.length; renderMini(); startInline(); }, IMAGE_TIME);
+    else if (state.settings.auto) state.inlineTimer = setTimeout(() => { state.current = (state.current + 1) % state.scenes.length; renderMini(); startInline(); }, Number(state.settings.duration) * 1000);
   }
   function renderMini() {
     const card = $('theater-mini-card'); if (!card) return;
@@ -85,7 +89,7 @@
     const scene = currentScene(); const media = $('theater-mini-media'); media.innerHTML = '';
     if (scene) {
       const el = document.createElement(scene.type === 'video' ? 'video' : 'img');
-      el.src = scene.url || urlFor(scene); el.muted = true; el.playsInline = true; el.className = 'theater-mini-preview';
+      el.src = scene.url || urlFor(scene); el.muted = true; el.playsInline = true; el.className = 'theater-mini-preview theater-effect-' + state.settings.effect;
       media.appendChild(el); $('theater-mini-title').textContent = scene.name;
       $('theater-mini-count').textContent = state.scenes.length ? `${state.current + 1}/${state.scenes.length}` : 'Video nhạc';
     } else {
@@ -119,7 +123,7 @@
   function stageMedia(scene) {
     const stage = $('theater-stage'); stage.querySelectorAll('.theater-stage-media,.theater-empty').forEach(el => el.remove());
     if (!scene) { const empty = document.createElement('div'); empty.className = 'theater-empty'; empty.innerHTML = '<div><b>Rạp chiếu đang trống</b><span>Thêm ảnh hoặc video để bắt đầu câu chuyện của hai đứa.</span></div>'; stage.prepend(empty); return null; }
-    const media = document.createElement(scene.type === 'video' ? 'video' : 'img'); media.id = 'theater-' + scene.type; media.className = 'theater-stage-media theater-enter' + (!reducedMotion ? ' theater-kenburns' : ''); media.src = scene.url || urlFor(scene); media.alt = scene.name; media.controls = false; media.playsInline = true; media.preload = 'metadata';
+    const media = document.createElement(scene.type === 'video' ? 'video' : 'img'); media.id = 'theater-' + scene.type; media.className = 'theater-stage-media theater-enter theater-effect-' + state.settings.effect + ' theater-transition-' + state.settings.transition + (!reducedMotion && state.settings.effect === 'kenburns' ? ' theater-kenburns' : ''); media.src = scene.url || urlFor(scene); media.alt = scene.name; media.controls = false; media.playsInline = true; media.preload = 'metadata';
     if (scene.type === 'video') { media.muted = false; media.onended = nextScene; media.onloadedmetadata = updateProgress; }
     stage.prepend(media); requestAnimationFrame(() => media.classList.remove('theater-enter'));
     $('theater-caption-title').textContent = scene.name; $('theater-caption-text').textContent = scene.type === 'video' ? 'Một đoạn phim trong câu chuyện của hai đứa.' : 'Một khoảnh khắc được giữ lại.';
@@ -128,7 +132,7 @@
   function showScene(index, autoplay) {
     if (!state.scenes.length && !state.songScene) { stageMedia(null); return; }
     clearTimer(); stopMediaOnly(); state.current = state.scenes.length ? (index + state.scenes.length) % state.scenes.length : 0; const scene = currentScene(); const media = stageMedia(scene); renderScenes(); renderMini(); $('theater-scene-index').textContent = `${state.current + 1}/${state.scenes.length}`;
-    const progress = $('theater-progress'); progress.value = 0; $('theater-current-time').textContent = '0:00'; $('theater-duration').textContent = scene.type === 'image' ? '0:06' : '0:00';
+    const progress = $('theater-progress'); progress.value = 0; $('theater-current-time').textContent = '0:00'; $('theater-duration').textContent = scene.type === 'image' ? formatTime(Number(state.settings.duration)) : '0:00';
     state.imageElapsed = 0; state.startedAt = performance.now();
     if (autoplay) startPlayback(media); else state.playing = false;
   }
@@ -136,7 +140,7 @@
     if (!currentScene()) return;
     state.playing = true; setSourceAudio(); const audio = $('theater-audio');
     if (currentScene().type === 'video') { audio?.pause(); media?.play().catch(() => {}); }
-    else { audio?.play().catch(() => {}); state.timer = setTimeout(nextScene, IMAGE_TIME); }
+    else { audio?.play().catch(() => {}); if (state.settings.auto) state.timer = setTimeout(nextScene, Number(state.settings.duration) * 1000); }
     updateButtons(); updateProgressLoop();
   }
   function pausePlayback() { state.playing = false; clearTimer(); stopMediaOnly(); $('theater-audio')?.pause(); updateButtons(); }
@@ -158,19 +162,32 @@
   function openTheater() { state.opened = true; $('theater-modal').classList.add('is-open'); document.body.classList.add('theater-open'); loadState().then(() => { setSourceAudio(); showScene(state.current, false); }); }
   function closeTheater() { state.opened = false; pausePlayback(); $('theater-modal').classList.remove('is-open'); document.body.classList.remove('theater-open'); if (document.fullscreenElement) document.exitFullscreen?.(); }
   function toggleFullscreen() { const shell = $('theater-shell'); if (!document.fullscreenElement) shell.requestFullscreen?.(); else document.exitFullscreen?.(); }
+  function refreshMusicList() {
+    const select = $('theater-music-select'); if (!select) return;
+    const songs = window.TheaterHost?.getSongs?.() || state.playlist || []; state.playlist = songs;
+    select.innerHTML = '<option value="">Chọn bài trong playlist cũ</option>' + songs.map((song, i) => `<option value="${i}">${escapeHtml(song.title || 'Bài nhạc ' + (i + 1))} · ${escapeHtml(song.artist || '')}</option>`).join('');
+    const current = songs.findIndex(song => song.audioUrl === state.selectedSong?.audioUrl || song.id === state.selectedSong?.id); if (current >= 0) select.value = String(current);
+  }
+  function toggleSettings() { const panel = $('theater-settings-panel'); if (!panel) return; panel.hidden = !panel.hidden; if (!panel.hidden) { refreshMusicList(); ['effect','transition','speed','duration'].forEach(key => { const el = $('theater-' + key + '-select'); if (el) el.value = String(state.settings[key]); }); const auto = $('theater-auto-check'); if (auto) auto.checked = state.settings.auto; } }
+  function chooseMusic() { const panel = $('theater-settings-panel'); if (panel?.hidden) toggleSettings(); else refreshMusicList(); $('theater-music-select')?.focus(); }
+  function updateSetting(key, value) { state.settings[key] = key === 'duration' ? Number(value) : value; saveSettings(); renderMini(); }
   function bind() {
     $('theater-open-btn')?.addEventListener('click', openTheater); $('theater-mini-open')?.addEventListener('click', openTheater); $('theater-close')?.addEventListener('click', closeTheater); $('theater-play')?.addEventListener('click', togglePlayback); $('theater-next')?.addEventListener('click', nextScene); $('theater-prev')?.addEventListener('click', prevScene); $('theater-fullscreen')?.addEventListener('click', toggleFullscreen); $('theater-progress')?.addEventListener('input', e => seek(e.target.value)); $('theater-volume')?.addEventListener('input', e => { $('theater-audio').volume = Number(e.target.value); });
-    $('theater-media-input')?.addEventListener('change', e => { addFiles(e.target.files); e.target.value = ''; }); $('theater-cover-input')?.addEventListener('change', e => { addCover(e.target.files[0]); e.target.value = ''; });
+    $('theater-media-input')?.addEventListener('change', e => { addFiles(e.target.files); e.target.value = ''; }); $('theater-cover-input')?.addEventListener('change', e => { addCover(e.target.files[0]); e.target.value = ''; }); $('theater-settings-media')?.addEventListener('change', e => { addFiles(e.target.files); e.target.value = ''; }); $('theater-settings-cover')?.addEventListener('change', e => { addCover(e.target.files[0]); e.target.value = ''; }); $('theater-music-select')?.addEventListener('change', e => { if (e.target.value !== '') window.TheaterHost?.selectSong?.(e.target.value); }); ['effect','transition','speed','duration'].forEach(key => $('theater-' + key + '-select')?.addEventListener('change', e => updateSetting(key, e.target.value))); $('theater-auto-check')?.addEventListener('change', e => updateSetting('auto', e.target.checked));
     $('theater-clear')?.addEventListener('click', async () => { if (!confirm('Xóa toàn bộ cảnh trong rạp chiếu?')) return; for (const scene of state.scenes) await dbDelete(scene.id); state.scenes = []; renderAll(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.opened && !document.fullscreenElement) closeTheater(); }); $('theater-modal')?.addEventListener('click', e => { if (e.target.id === 'theater-modal') closeTheater(); });
   }
+  function setPlaylist(songs) { state.playlist = songs || []; refreshMusicList(); }
+  function pauseMusic() { window.TheaterHost?.pauseSong?.(); state.selectedSong = state.selectedSong ? { ...state.selectedSong, isPlaying: false } : state.selectedSong; stopInline(); renderMini(); }
+  function hideInline() { const card = $('theater-mini-card'); if (card) card.classList.add('is-hidden'); }
   function syncSong(song) {
     state.selectedSong = song || null;
+    if (song?.isPlaying) $('theater-mini-card')?.classList.remove('is-hidden');
     state.songScene = song?.mediaType === 'video' ? { id: 'song-video', type: 'video', name: song.title, url: song.audioUrl } : null;
     renderMini();
     if (state.opened && state.songScene && !state.scenes.length) showScene(0, Boolean(song.isPlaying));
   }
   function syncPlayback(playing) { state.selectedSong = state.selectedSong ? { ...state.selectedSong, isPlaying: playing } : state.selectedSong; renderMini(); }
-  window.TheaterApp = { open: openTheater, close: closeTheater, syncSong, syncPlayback };
+  window.TheaterApp = { open: openTheater, close: closeTheater, syncSong, syncPlayback, toggleSettings, chooseMusic, setPlaylist, pauseMusic, hideInline };
   window.addEventListener('DOMContentLoaded', () => { bind(); loadState(); });
 })();

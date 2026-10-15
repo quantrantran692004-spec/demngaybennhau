@@ -733,10 +733,16 @@
             <div id="theater-mini-media" class="theater-mini-media"></div>
             <div class="theater-mini-overlay"><strong id="theater-mini-title">Kỷ niệm của hai đứa</strong><span>Chạm để mở rạp chiếu</span></div>
             <button id="theater-mini-open" type="button" class="theater-mini-open">Mở rộng</button>
-            <div class="theater-mini-meta"><span>Khoảnh khắc <b id="theater-mini-count">0/0</b></span><span class="theater-mini-actions"><label>＋ Thêm ảnh/video<input id="theater-media-input" type="file" accept="image/*,video/mp4,video/webm" multiple></label><label>▣ Chọn bìa<input id="theater-cover-input" type="file" accept="image/*"></label><button type="button" onclick="TheaterApp.open()">⛶ Phóng to</button></span></div>
+            <div class="theater-mini-meta"><span>Khoảnh khắc <b id="theater-mini-count">0/0</b></span><span class="theater-mini-actions"><button type="button" onclick="TheaterApp.chooseMusic()">♫ Chọn nhạc</button><label>＋ Thêm ảnh/video<input id="theater-media-input" type="file" accept="image/*,video/mp4,video/webm" multiple></label><label>▣ Chọn bìa<input id="theater-cover-input" type="file" accept="image/*"></label><button type="button" onclick="TheaterApp.pauseMusic()">⏸ Tạm dừng</button><button type="button" onclick="TheaterApp.hideInline()">－ Ẩn rạp</button><button type="button" onclick="TheaterApp.toggleSettings()">⚙ Cài đặt</button><button type="button" onclick="TheaterApp.open()">⛶ Phóng to</button></span></div>
           </div>
 
 
+          <div id="theater-settings-panel" class="theater-settings-panel" hidden>
+            <div class="theater-settings-heading"><strong>⚙ Cài đặt rạp chiếu</strong><button type="button" onclick="TheaterApp.toggleSettings()">×</button></div>
+            <label>Nhạc nền<select id="theater-music-select"><option value="">Chọn bài trong playlist cũ</option></select></label>
+            <div class="theater-settings-grid"><label>Hiệu ứng ảnh<select id="theater-effect-select"><option value="kenburns">Ken Burns</option><option value="fade">Fade</option><option value="slide">Trượt ngang</option><option value="polaroid">Polaroid</option><option value="glow">Soft Glow</option></select></label><label>Chuyển cảnh<select id="theater-transition-select"><option value="fade">Fade</option><option value="slide">Slide</option><option value="zoom">Zoom</option><option value="blur">Blur</option></select></label><label>Tốc độ<select id="theater-speed-select"><option value="slow">Chậm</option><option value="normal">Vừa</option><option value="fast">Nhanh</option></select></label><label>Thời gian ảnh<select id="theater-duration-select"><option value="4">4 giây</option><option value="6.5">6,5 giây</option><option value="10">10 giây</option></select></label></div>
+            <div class="theater-settings-actions"><label>＋ Thêm cảnh<input id="theater-settings-media" type="file" accept="image/*,video/mp4,video/webm" multiple></label><label>▣ Đổi ảnh bìa<input id="theater-settings-cover" type="file" accept="image/*"></label><label class="theater-check"><input id="theater-auto-check" type="checkbox" checked> Tự chuyển cảnh</label></div>
+          </div>
         <!-- SPOTIFY MINI PLAYER CONTROLLER CARD -->
         <div id="hero-music-player" class="p-4 sm:p-4 rounded-3xl ios-glass border border-pink-200 dark:border-neutral-700 shadow-xl space-y-3 max-w-lg">
           <div class="flex items-center justify-between">
@@ -2274,6 +2280,7 @@
       }
     } catch (error) { console.warn('Không thể đọc thứ tự playlist:', error); }
     let currentSongIndex = 0;
+    window.TheaterHost = { getSongs: () => songs, selectSong: index => setSong(Number(index)), pauseSong: () => { if (isPlaying) togglePlayMusic(); } };
     let isPlaying = false;
     let audioObj = new Audio(songs[0]?.audioUrl || '');
     audioObj.volume = 0.72;
