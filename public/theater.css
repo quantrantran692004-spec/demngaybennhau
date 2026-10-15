@@ -1,4 +1,4 @@
-#theater-mini-card{display:block;position:relative;margin-top:.65rem;overflow:hidden;border:1px solid rgba(244,114,182,.25);border-radius:1rem;background:linear-gradient(135deg,#241923,#111827);color:#fff;box-shadow:0 12px 32px rgba(190,24,93,.12)}
+#theater-mini-card{display:none;position:relative;margin-top:.65rem;overflow:hidden;border:1px solid rgba(244,114,182,.25);border-radius:1rem;background:linear-gradient(135deg,#241923,#111827);color:#fff;box-shadow:0 12px 32px rgba(190,24,93,.12)}
 #theater-mini-card.has-scenes{display:block}
 .theater-mini-media{height:210px;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 20%,#523047,#111827 72%)}
 .theater-mini-preview-placeholder{height:100%;display:grid;place-items:center;color:#fbcfe8;font-size:.72rem}.theater-mini-preview{animation:theaterMiniFade .7s ease both}.theater-mini-media img,.theater-mini-media video{width:100%;height:100%;object-fit:contain;display:block;position:relative;z-index:1}

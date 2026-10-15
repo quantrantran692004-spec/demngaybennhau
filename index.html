@@ -2025,7 +2025,7 @@
           }
         });
         renderUploadedSongs();
-        if (records.length) document.getElementById('uploaded-song-list')?.classList.remove('hidden');
+        // Không tự mở playlist khi tải trang; chỉ mở bằng nút danh sách nhạc.
         const lastSongId = localStorage.getItem('our_love_last_custom_song');
         const restoredIndex = songs.findIndex(song => song.storageId === lastSongId);
         if (restoredIndex >= 0) setSong(restoredIndex);

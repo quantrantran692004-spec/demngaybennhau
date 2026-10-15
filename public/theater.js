@@ -87,7 +87,7 @@
   }
   function renderMini() {
     const card = $('theater-mini-card'); if (!card) return;
-    card.classList.toggle('has-scenes', state.scenes.length > 0 || Boolean(state.selectedSong)); card.classList.toggle('is-playing', Boolean(state.selectedSong?.isPlaying));
+    card.classList.toggle('has-scenes', Boolean(state.selectedSong?.isPlaying)); card.classList.toggle('is-playing', Boolean(state.selectedSong?.isPlaying));
     const media = $('theater-mini-media'); const oldVideo = media.querySelector('video'); if (oldVideo && Number.isFinite(oldVideo.currentTime)) state.songVideoTime = oldVideo.currentTime; const scene = (!state.selectedSong?.isPlaying && state.cover) ? null : currentScene(); media.innerHTML = '';
     if (scene) {
       const el = document.createElement(scene.type === 'video' ? 'video' : 'img');
@@ -197,7 +197,7 @@
     const previousId = state.selectedSong?.id || state.selectedSong?.storageId || state.selectedSong?.audioUrl;
     state.selectedSong = song || null;
     const nextId = song?.id || song?.storageId || song?.audioUrl;
-    if (song && (song.isPlaying || nextId !== previousId)) $('theater-mini-card')?.classList.remove('is-hidden');
+    if (song?.isPlaying) $('theater-mini-card')?.classList.remove('is-hidden'); else $('theater-mini-card')?.classList.add('is-hidden');
     state.songScene = song?.mediaType === 'video' ? { id: 'song-video', type: 'video', name: song.title, url: song.audioUrl } : null;
     renderMini();
     if (state.opened && state.songScene && !state.scenes.length) showScene(0, Boolean(song.isPlaying));
