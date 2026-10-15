@@ -2611,7 +2611,7 @@
         audioObj.pause();
         stopSoftChords();
       }
-      window.TheaterApp?.syncPlayback?.(isPlaying);
+      window.TheaterApp?.syncSong?.({ ...songs[currentSongIndex], isPlaying });
     }
 
     function updatePlayerUI() {
