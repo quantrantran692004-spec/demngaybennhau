@@ -2275,7 +2275,7 @@
       }
     } catch (error) { console.warn('Không thể đọc thứ tự playlist:', error); }
     let currentSongIndex = 0;
-    window.TheaterHost = { getSongs: () => songs, selectSong: index => setSong(Number(index)), pauseSong: () => { if (isPlaying) togglePlayMusic(); } };
+    window.TheaterHost = { getSongs: () => songs, selectSong: index => setSong(Number(index)), pauseSong: () => { if (isPlaying) togglePlayMusic(); }, toggleSong: () => togglePlayMusic() };
     let isPlaying = false;
     let audioObj = new Audio(songs[0]?.audioUrl || '');
     audioObj.volume = 0.72;
