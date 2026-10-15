@@ -180,7 +180,7 @@
     }
     const { data: signed, error: signedError } = await supabaseClient.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 7);
     if (signedError) throw signedError;
-    return { title, artist: 'Nhạc tải lên cá nhân', cover: '', audioUrl: signed.signedUrl, duration: 0, storageId: `cloud-${id}` };
+    return { title, artist: 'Nhạc tải lên cá nhân', cover: '', audioUrl: signed.signedUrl, duration: 0, storageId: `cloud-${id}`, mediaType: file.type.startsWith('video/') || /\.(mp4|webm|mov)$/i.test(file.name) ? 'video' : 'audio' };
   }
 
   async function restoreSongs() {
@@ -201,7 +201,8 @@
         cover: '',
         audioUrl: signed.signedUrl,
         duration: 0,
-        storageId: `cloud-${record.id}`
+        storageId: `cloud-${record.id}`,
+        mediaType: record.content_type?.startsWith('video/') || /\.(mp4|webm|mov)$/i.test(record.object_path || '') ? 'video' : 'audio'
       });
     }
     window.LoveSpaceApp.restoreCloudSongs(restored);

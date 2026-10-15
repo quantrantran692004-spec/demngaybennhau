@@ -3493,7 +3493,7 @@
       },
       restoreCloudSongs: (cloudSongs) => {
         cloudSongs.forEach(song => {
-          if (!songs.some(existing => existing.storageId === song.storageId)) songs.push(song);
+          if (!songs.some(existing => existing.storageId === song.storageId)) songs.push({ ...song, mediaType: song.mediaType || (song.content_type?.startsWith('video/') ? 'video' : 'audio') });
         });
         renderUploadedSongs();
         const userId = window.loveCloud?.userId;
