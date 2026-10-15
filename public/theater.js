@@ -6,7 +6,7 @@
   const DEFAULT_SETTINGS = { effect: 'kenburns', transition: 'fade', speed: 'normal', duration: 6.5, auto: true, videoAudio: 'original' };
   const MAX_BYTES = 120 * 1024 * 1024;
   const $ = id => document.getElementById(id);
-  const state = { scenes: [], audio: null, current: 0, playing: false, opened: false, timer: null, raf: 0, startedAt: 0, imageElapsed: 0, objectUrls: new Map(), loaded: false, dragging: null, selectedSong: null, theaterAudioSong: null, songScene: null, cover: null, inlineTimer: null, settings: { ...DEFAULT_SETTINGS }, playlist: [] };
+  const state = { scenes: [], audio: null, current: 0, playing: false, opened: false, timer: null, raf: 0, startedAt: 0, imageElapsed: 0, objectUrls: new Map(), loaded: false, dragging: null, selectedSong: null, theaterAudioSong: null, songScene: null, songVideoTime: 0, cover: null, inlineTimer: null, settings: { ...DEFAULT_SETTINGS }, playlist: [] };
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   function loadSettings() { try { state.settings = { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem('our_love_theater_settings') || '{}') }; } catch (_) {} }
   function saveSettings() { localStorage.setItem('our_love_theater_settings', JSON.stringify(state.settings)); }
@@ -82,16 +82,16 @@
   function startInline() {
     stopInline(); if (!state.selectedSong?.isPlaying || (!state.scenes.length && !state.songScene)) return;
     const scene = currentScene();
-    if (scene?.type === 'video') $('theater-mini-media')?.querySelector('video')?.play().catch(() => {});
+    if (scene?.type === 'video') { const video = $('theater-mini-media')?.querySelector('video'); if (video) { if (Number.isFinite(state.songVideoTime)) video.currentTime = state.songVideoTime; video.addEventListener('timeupdate', () => { state.songVideoTime = video.currentTime || 0; }); video.play().catch(() => {}); } }
     else if (state.settings.auto) state.inlineTimer = setTimeout(() => { state.current = (state.current + 1) % state.scenes.length; renderMini(); startInline(); }, Number(state.settings.duration) * 1000);
   }
   function renderMini() {
     const card = $('theater-mini-card'); if (!card) return;
     card.classList.toggle('has-scenes', state.scenes.length > 0 || Boolean(state.selectedSong)); card.classList.toggle('is-playing', Boolean(state.selectedSong?.isPlaying));
-    const scene = currentScene(); const media = $('theater-mini-media'); media.innerHTML = '';
+    const media = $('theater-mini-media'); const oldVideo = media.querySelector('video'); if (oldVideo && Number.isFinite(oldVideo.currentTime)) state.songVideoTime = oldVideo.currentTime; const scene = (!state.selectedSong?.isPlaying && state.cover) ? null : currentScene(); media.innerHTML = '';
     if (scene) {
       const el = document.createElement(scene.type === 'video' ? 'video' : 'img');
-      el.src = scene.url || urlFor(scene); el.muted = scene.type === 'video' && state.settings.videoAudio === 'mute'; el.playsInline = true; el.className = 'theater-mini-preview theater-effect-' + state.settings.effect;
+      el.src = scene.url || urlFor(scene); el.muted = scene.type === 'video' && state.settings.videoAudio === 'mute'; el.playsInline = true; el.className = 'theater-mini-preview theater-effect-' + state.settings.effect; if (scene.type === 'video') { el.addEventListener('timeupdate', () => { state.songVideoTime = el.currentTime || 0; }); el.addEventListener('loadedmetadata', () => { if (state.songVideoTime > 0) el.currentTime = state.songVideoTime; }); }
       media.appendChild(el); $('theater-mini-title').textContent = scene.name;
       $('theater-mini-count').textContent = state.scenes.length ? `${state.current + 1}/${state.scenes.length}` : 'Video nhạc';
     } else {
@@ -129,7 +129,7 @@
     const stage = $('theater-stage'); stage.querySelectorAll('.theater-stage-media,.theater-empty').forEach(el => el.remove());
     if (!scene) { const empty = document.createElement('div'); empty.className = 'theater-empty'; empty.innerHTML = '<div><b>Rạp chiếu đang trống</b><span>Thêm ảnh hoặc video để bắt đầu câu chuyện của hai đứa.</span></div>'; stage.prepend(empty); return null; }
     const media = document.createElement(scene.type === 'video' ? 'video' : 'img'); media.id = 'theater-' + scene.type; media.className = 'theater-stage-media theater-enter theater-effect-' + state.settings.effect + ' theater-transition-' + state.settings.transition + (!reducedMotion && state.settings.effect === 'kenburns' ? ' theater-kenburns' : ''); media.src = scene.url || urlFor(scene); media.alt = scene.name; media.controls = false; media.playsInline = true; media.preload = 'metadata';
-    if (scene.type === 'video') { media.muted = state.settings.videoAudio === 'mute'; media.onended = nextScene; media.onloadedmetadata = updateProgress; }
+    if (scene.type === 'video') { media.muted = state.settings.videoAudio === 'mute'; media.onended = nextScene; media.onloadedmetadata = () => { if (state.songVideoTime > 0) media.currentTime = state.songVideoTime; updateProgress(); }; media.addEventListener('timeupdate', () => { state.songVideoTime = media.currentTime || 0; }); if (state.songVideoTime > 0) media.currentTime = state.songVideoTime; }
     stage.prepend(media); requestAnimationFrame(() => media.classList.remove('theater-enter'));
     $('theater-caption-title').textContent = scene.name; $('theater-caption-text').textContent = scene.type === 'video' ? 'Một đoạn phim trong câu chuyện của hai đứa.' : 'Một khoảnh khắc được giữ lại.';
     return media;
@@ -158,13 +158,13 @@
   function updateProgress() {
     const scene = currentScene(); if (!scene) return;
     const media = document.getElementById('theater-' + scene.type); let current = 0, duration = scene.type === 'image' ? IMAGE_TIME / 1000 : media?.duration;
-    if (scene.type === 'video' && media) { current = media.currentTime || 0; duration = Number.isFinite(media.duration) ? media.duration : 0; }
+    if (scene.type === 'video' && media) { current = media.currentTime || 0; state.songVideoTime = current; duration = Number.isFinite(media.duration) ? media.duration : 0; }
     if (scene.type === 'image' && state.playing) current = Math.min(IMAGE_TIME / 1000, (performance.now() - state.startedAt) / 1000);
     const progress = $('theater-progress'); if (progress && duration) progress.value = Math.min(100, current / duration * 100);
     $('theater-current-time').textContent = formatTime(current); $('theater-duration').textContent = formatTime(duration || 0);
   }
   function updateProgressLoop() { if (!state.opened || !state.playing) return; updateProgress(); state.raf = requestAnimationFrame(updateProgressLoop); }
-  function seek(value) { const scene = currentScene(); if (!scene) return; const media = document.getElementById('theater-' + scene.type); const percent = Number(value) / 100; if (scene.type === 'video' && media?.duration) media.currentTime = media.duration * percent; else if (scene.type === 'image') { state.startedAt = performance.now() - IMAGE_TIME * percent; } updateProgress(); }
+  function seek(value) { const scene = currentScene(); if (!scene) return; const media = document.getElementById('theater-' + scene.type); const percent = Number(value) / 100; if (scene.type === 'video' && media?.duration) { media.currentTime = media.duration * percent; state.songVideoTime = media.currentTime; } else if (scene.type === 'image') { state.startedAt = performance.now() - IMAGE_TIME * percent; } updateProgress(); }
   function openTheater() { window.TheaterHost?.pauseSong?.(); state.opened = true; state.playing = false; $('theater-modal').classList.add('is-open'); document.body.classList.add('theater-open'); loadState().then(() => { setSourceAudio(); showScene(state.current, false); const panel = $('theater-settings-panel'); if (panel) panel.hidden = true; populateSettings(); updateButtons(); }); }
   function closeTheater() { state.opened = false; pausePlayback(); $('theater-modal').classList.remove('is-open'); document.body.classList.remove('theater-open'); if (document.fullscreenElement) document.exitFullscreen?.(); }
   function toggleFullscreen() { const shell = $('theater-shell'); if (!document.fullscreenElement) shell.requestFullscreen?.(); else document.exitFullscreen?.(); }
