@@ -2684,23 +2684,40 @@
       setSong(currentSongIndex - 1);
     }
 
+    function isAudioFile(file) {
+      const extension = String(file.name || '').toLowerCase().split('.').pop();
+      return file.type.startsWith('audio/') || ['mp3', 'm4a', 'wav', 'ogg', 'oga', 'aac', 'flac', 'webm'].includes(extension);
+    }
     function addCustomSong(event) {
       const files = Array.from(event.target.files || []);
       if (!files.length) return;
-      const invalidFile = files.find(file => !file.type.startsWith('audio/'));
+      const invalidFile = files.find(file => !isAudioFile(file));
       if (invalidFile) {
-        showMusicToast('"' + invalidFile.name + '" không phải file âm thanh.');
+        showMusicToast('"' + invalidFile.name + '" không phải file âm thanh hợp lệ.');
         event.target.value = '';
         return;
       }
-
+      const tooLargeFile = files.find(file => file.size > 50 * 1024 * 1024);
+      if (tooLargeFile && window.loveCloud?.userId) {
+        showMusicToast('File "' + tooLargeFile.name + '" vượt quá giới hạn 50 MB.');
+        event.target.value = '';
+        return;
+      }
       event.target.value = '';
+      showMusicToast('Đang lưu ' + files.length + ' bài nhạc…');
       Promise.all(files.map(file => saveCustomSong(file))).then(newSongs => {
         songs.push(...newSongs);
         persistSongOrder();
         isPlaying = false;
         setSong(songs.length - newSongs.length);
         renderUploadedSongs();
+        showMusicToast('Đã thêm ' + newSongs.length + ' bài nhạc vào playlist.');
+      }).catch(error => {
+        console.error('Lưu nhạc thất bại:', error);
+        showMusicToast(error?.message || 'Không lưu được bài nhạc. Hãy thử lại nhé.');
+      });
+    }
+    renderUploadedSongs();
         showMusicToast('Đã thêm ' + newSongs.length + ' bài nhạc và đang phát.');
       }).catch(error => {
         console.error('Lưu nhạc thất bại:', error);
