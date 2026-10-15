@@ -5,7 +5,7 @@
   const IMAGE_TIME = 6500;
   const MAX_BYTES = 120 * 1024 * 1024;
   const $ = id => document.getElementById(id);
-  const state = { scenes: [], audio: null, current: 0, playing: false, opened: false, timer: null, raf: 0, startedAt: 0, imageElapsed: 0, objectUrls: new Map(), loaded: false };
+  const state = { scenes: [], audio: null, current: 0, playing: false, opened: false, timer: null, raf: 0, startedAt: 0, imageElapsed: 0, objectUrls: new Map(), loaded: false, dragging: null };
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const toast = text => { const el = document.getElementById('garden-toast'); if (el) { el.textContent = text; el.classList.add('is-visible'); setTimeout(() => el.classList.remove('is-visible'), 2600); } else console.info(text); };
   const openDb = () => new Promise((resolve, reject) => {
@@ -81,7 +81,11 @@
     const list = $('theater-scene-list'); if (!list) return;
     list.innerHTML = '';
     state.scenes.forEach((scene, index) => {
-      const item = document.createElement('button'); item.type = 'button'; item.className = 'theater-scene' + (index === state.current ? ' is-active' : ''); item.dataset.index = index;
+      const item = document.createElement('button'); item.type = 'button'; item.className = 'theater-scene' + (index === state.current ? ' is-active' : ''); item.dataset.index = index; item.draggable = true;
+      item.addEventListener('dragstart', () => { state.dragging = index; item.classList.add('is-dragging'); });
+      item.addEventListener('dragend', () => { state.dragging = null; item.classList.remove('is-dragging'); });
+      item.addEventListener('dragover', event => event.preventDefault());
+      item.addEventListener('drop', async event => { event.preventDefault(); const from = state.dragging; const to = index; if (from === null || from === to) return; const [moved] = state.scenes.splice(from, 1); state.scenes.splice(to, 0, moved); state.scenes.forEach((record, order) => { record.order = order; dbPut(record); }); state.current = Math.min(state.current, state.scenes.length - 1); renderAll(); });
       const thumb = document.createElement(scene.type === 'video' ? 'video' : 'img'); thumb.src = urlFor(scene); thumb.muted = true; thumb.playsInline = true; thumb.className = 'theater-scene-thumb-media';
       const box = document.createElement('span'); box.className = 'theater-scene-thumb'; box.appendChild(thumb);
       const text = document.createElement('span'); text.innerHTML = `<span class="theater-scene-name">${escapeHtml(scene.name)}</span><span class="theater-scene-type">${scene.type === 'video' ? 'Video' : 'Ảnh'} · ${index + 1}</span>`;
@@ -120,7 +124,7 @@
   }
   function pausePlayback() { state.playing = false; clearTimer(); stopMediaOnly(); $('theater-audio')?.pause(); updateButtons(); }
   function togglePlayback() { if (state.playing) pausePlayback(); else startPlayback(); }
-  function nextScene() { if (!state.scenes.length) return; showScene(state.current + 1, state.playing || true); }
+  function nextScene() { if (!state.scenes.length) return; showScene(state.current + 1, state.playing); }
   function prevScene() { if (!state.scenes.length) return; showScene(state.current - 1, state.playing); }
   function formatTime(value) { if (!Number.isFinite(value)) return '0:00'; const m = Math.floor(value / 60); const s = Math.floor(value % 60).toString().padStart(2, '0'); return `${m}:${s}`; }
   function updateButtons() { const btn = $('theater-play'); if (btn) btn.textContent = state.playing ? 'Ⅱ' : '▶'; }
