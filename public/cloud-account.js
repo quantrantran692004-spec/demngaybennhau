@@ -180,7 +180,7 @@
     }
     const { data: signed, error: signedError } = await supabaseClient.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 7);
     if (signedError) throw signedError;
-    return { title, artist: 'Nhạc tải lên cá nhân', cover: '', audioUrl: signed.signedUrl, duration: 0, storageId: `cloud-${id}`, mediaType: file.type.startsWith('video/') || /\.(mp4|webm|mov)$/i.test(file.name) ? 'video' : 'audio' };
+    return { title, artist: 'Nhạc tải lên cá nhân', cover: '', audioUrl: signed.signedUrl, duration: 0, storageId: `cloud-${id}`, objectPath: path, mediaType: file.type.startsWith('video/') || /\.(mp4|webm|mov)$/i.test(file.name) ? 'video' : 'audio' };
   }
 
   async function restoreSongs() {
@@ -202,6 +202,7 @@
         audioUrl: signed.signedUrl,
         duration: 0,
         storageId: `cloud-${record.id}`,
+        objectPath: record.object_path,
         mediaType: record.content_type?.startsWith('video/') || /\.(mp4|webm|mov)$/i.test(record.object_path || '') ? 'video' : 'audio'
       });
     }
@@ -256,6 +257,15 @@
     },
     async uploadSong(file) {
       return saveSong(file);
+    },
+    async deleteSong(song) {
+      if (!user || !song?.storageId?.startsWith('cloud-')) throw new Error('Không xác định được bài cloud cần xóa.');
+      const id = song.storageId.slice('cloud-'.length);
+      const objectPath = song.objectPath || `${user.id}/music/${id}`;
+      const { error: rowError } = await supabaseClient.from('user_music').delete().eq('id', id).eq('user_id', user.id);
+      if (rowError) throw rowError;
+      const { error: storageError } = await supabaseClient.storage.from(bucket).remove([objectPath]);
+      if (storageError) console.warn('Không xóa được file vật lý cloud:', storageError);
     }
   };
   window.loveCloud = api;

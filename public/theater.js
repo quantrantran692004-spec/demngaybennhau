@@ -142,6 +142,7 @@
   }
   function startPlayback(media = document.getElementById('theater-' + (currentScene()?.type || 'image'))) {
     if (!currentScene()) return;
+    window.TheaterHost?.pauseSong?.();
     state.playing = true; setSourceAudio(); const audio = $('theater-audio');
     if (currentScene().type === 'video') { audio?.pause(); media?.play().catch(() => {}); }
     else { audio?.play().catch(() => {}); if (state.settings.auto) state.timer = setTimeout(nextScene, Number(state.settings.duration) * 1000); }
@@ -194,6 +195,7 @@
     if (state.opened && state.songScene && !state.scenes.length) showScene(0, Boolean(song.isPlaying));
   }
   function syncPlayback(playing) { state.selectedSong = state.selectedSong ? { ...state.selectedSong, isPlaying: playing } : state.selectedSong; renderMini(); }
-  window.TheaterApp = { open: openTheater, close: closeTheater, syncSong, syncPlayback, toggleSettings, chooseMusic, setPlaylist, pauseMusic, hideInline };
+  function pauseForPlaylist() { pausePlayback(); }
+  window.TheaterApp = { open: openTheater, close: closeTheater, syncSong, syncPlayback, toggleSettings, chooseMusic, setPlaylist, pauseMusic, hideInline, pauseForPlaylist };
   window.addEventListener('DOMContentLoaded', () => { bind(); loadState(); });
 })();
