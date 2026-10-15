@@ -605,8 +605,8 @@
             <button id="theater-open-btn" type="button" class="rounded-full border border-pink-200 bg-pink-50 px-3 py-1.5 text-[10px] font-bold text-pink-600 transition hover:bg-pink-100 dark:border-neutral-600 dark:bg-neutral-800 dark:text-pink-300">♥ Rạp kỷ niệm</button>
             <label class="relative overflow-hidden cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-pink-200 dark:border-neutral-600 text-pink-600 dark:text-pink-300 hover:bg-pink-50 dark:hover:bg-neutral-800 text-[11px] font-bold transition-colors">
               <span class="text-sm leading-none">＋</span>
-              <span>Thêm nhạc</span>
-              <input id="music-file-input" type="file" accept="audio/*,video/*,.mp3,.mp4,.m4a,.wav,.ogg,.oga,.aac,.flac,.webm,.mov,.m4v" multiple class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0" onchange="addCustomSong(event)">
+              <span>Thêm MP3</span>
+              <input id="music-file-input" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.oga,.aac,.flac" multiple class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0" onchange="addCustomSong(event)">
             </label>
           </div>
           <div class="flex justify-end">
@@ -1986,12 +1986,13 @@
     }
 
     async function saveCustomSong(file) {
+      if (String(file.type || '').startsWith('video/') || /\.(mp4|webm|mov|m4v)$/i.test(file.name || '')) throw new Error('MP4/video phải tải trong Rạp kỷ niệm, không tải ở Playlist MP3.');
       if (window.loveCloud?.userId) return window.loveCloud.uploadSong(file);
       const record = {
         id: 'custom-' + Date.now() + '-' + Math.random().toString(36).slice(2),
         title: file.name.replace(/\.[^/.]+$/, '') || 'Bài hát mới',
         artist: 'Nhạc tải lên cá nhân',
-        mediaType: /\.(mp4|webm|mov)$/i.test(file.name) || file.type.startsWith('video/') ? 'video' : 'audio',
+        mediaType: 'audio',
         blob: file
       };
       const db = await openMusicDatabase();
@@ -2028,7 +2029,8 @@
         let removed = new Set();
         try { removed = new Set(JSON.parse(localStorage.getItem(MUSIC_REMOVED_KEY) || '[]')); } catch (error) { /* ignore */ }
         records.forEach(record => {
-          if (!removed.has(record.id) && !songs.some(song => song.storageId === record.id)) {
+          const isVideoRecord = record.mediaType === 'video' || record.blob?.type?.startsWith('video/') || /\.(mp4|webm|mov|m4v)$/i.test(record.title || '');
+          if (!isVideoRecord && !removed.has(record.id) && !songs.some(song => song.storageId === record.id)) {
             songs.push({
               title: record.title,
               artist: record.artist,
@@ -2350,14 +2352,14 @@
     function isAudioFile(file) {
       const extension = String(file.name || '').toLowerCase().split('.').pop();
       const mime = String(file.type || '').toLowerCase();
-      return mime.startsWith('audio/') || mime.startsWith('video/') || ['mp3', 'm4a', 'wav', 'ogg', 'oga', 'aac', 'flac', 'webm', 'mp4', 'mov', 'm4v'].includes(extension);
+      return mime.startsWith('audio/') || ['mp3', 'm4a', 'wav', 'ogg', 'oga', 'aac', 'flac'].includes(extension);
     }
     function addCustomSong(event) {
       const files = Array.from(event.target.files || []);
       if (!files.length) return;
       const invalidFile = files.find(file => !isAudioFile(file));
       if (invalidFile) {
-        showMusicToast('"' + invalidFile.name + '" không phải file âm thanh hợp lệ.');
+        showMusicToast('"' + invalidFile.name + '" không phải MP3/audio hợp lệ. MP4 hãy tải trong Rạp kỷ niệm.');
         event.target.value = '';
         return;
       }
@@ -2564,7 +2566,8 @@
       },
       restoreCloudSongs: (cloudSongs) => {
         cloudSongs.forEach(song => {
-          if (!songs.some(existing => existing.storageId === song.storageId)) songs.push({ ...song, mediaType: song.mediaType || (song.content_type?.startsWith('video/') ? 'video' : 'audio') });
+          const isVideo = song.mediaType === 'video' || song.content_type?.startsWith('video/') || /\.(mp4|webm|mov|m4v)$/i.test(song.objectPath || song.title || '');
+          if (!isVideo && !songs.some(existing => existing.storageId === song.storageId)) songs.push({ ...song, mediaType: 'audio' });
         });
         renderUploadedSongs();
         const userId = window.loveCloud?.userId;
@@ -2594,7 +2597,7 @@
             <div class="theater-settings-heading"><strong>⚙ Cài đặt rạp chiếu</strong><button type="button" onclick="TheaterApp.toggleSettings()">×</button></div>
             <label>Nhạc nền<select id="theater-music-select"><option value="">Chọn bài trong playlist cũ</option></select></label>
             <div class="theater-settings-grid"><label>Hiệu ứng ảnh<select id="theater-effect-select"><option value="kenburns">Ken Burns</option><option value="fade">Fade</option><option value="slide">Trượt ngang</option><option value="polaroid">Polaroid</option><option value="glow">Soft Glow</option></select></label><label>Chuyển cảnh<select id="theater-transition-select"><option value="fade">Fade</option><option value="slide">Slide</option><option value="zoom">Zoom</option><option value="blur">Blur</option></select></label><label>Tốc độ<select id="theater-speed-select"><option value="slow">Chậm</option><option value="normal">Vừa</option><option value="fast">Nhanh</option></select></label><label>Âm thanh video<select id="theater-video-audio-select"><option value="original">Giữ âm thanh gốc</option><option value="mute">Tắt âm thanh gốc</option></select></label><label>Thời gian ảnh<select id="theater-duration-select"><option value="4">4 giây</option><option value="6.5">6,5 giây</option><option value="10">10 giây</option></select></label></div>
-            <div class="theater-settings-actions"><label>＋ Thêm cảnh<input id="theater-settings-media" type="file" accept="image/*,video/*,.mp4,.webm,.mov,.m4v" multiple></label><label>▣ Đổi ảnh bìa<input id="theater-settings-cover" type="file" accept="image/*"></label><label class="theater-check"><input id="theater-auto-check" type="checkbox" checked> Tự chuyển cảnh</label><button id="theater-save-settings" type="button" class="theater-save-settings">Lưu cấu hình</button></div><p id="theater-upload-status" class="theater-upload-status" role="status" aria-live="polite"></p>
+            <div class="theater-settings-actions"><label>＋ Thêm ảnh / MP4<input id="theater-settings-media" type="file" accept="image/*,video/*,.mp4,.webm,.mov,.m4v" multiple></label><label>▣ Đổi ảnh bìa<input id="theater-settings-cover" type="file" accept="image/*"></label><label class="theater-check"><input id="theater-auto-check" type="checkbox" checked> Tự chuyển cảnh</label><button id="theater-save-settings" type="button" class="theater-save-settings">Lưu cấu hình</button></div><p id="theater-upload-status" class="theater-upload-status" role="status" aria-live="polite"></p>
           </div>
 
       <div class="theater-body"><main class="theater-main"><div id="theater-stage" class="theater-stage"><div class="theater-empty"><div><b>Rạp chiếu đang trống</b><span>Thêm ảnh hoặc video để bắt đầu câu chuyện của hai đứa.</span></div></div><div class="theater-caption"><strong id="theater-caption-title">Kỷ niệm của hai đứa</strong><p id="theater-caption-text">Thêm ảnh, video và nhạc để tạo bộ phim riêng.</p></div></div><div class="theater-controls"><div class="theater-progress-row"><span id="theater-current-time">0:00</span><input id="theater-progress" class="theater-progress" type="range" min="0" max="100" step="0.1" value="0" aria-label="Tiến trình cảnh"><span id="theater-duration">0:00</span></div><div class="theater-control-row"><button id="theater-prev" class="theater-icon-btn" type="button" title="Cảnh trước">⏮</button><button id="theater-play" class="theater-icon-btn theater-play" type="button" title="Phát">▶</button><button id="theater-next" class="theater-icon-btn" type="button" title="Cảnh sau">⏭</button><span class="theater-control-spacer"></span><span>🔊</span><input id="theater-volume" class="theater-volume" type="range" min="0" max="1" step="0.05" value="1" aria-label="Âm lượng"><audio id="theater-audio" preload="metadata"></audio></div><div class="theater-add-row"><span>Chọn nhạc từ playlist ở trên</span></div></div></main><aside class="theater-scenes"><div class="theater-scenes-title"><span>Các cảnh <small id="theater-scene-index">0/0</small></span><button id="theater-clear" class="theater-icon-btn" type="button" title="Xóa tất cả">⌫</button></div><div id="theater-scene-list" class="theater-scene-list"></div></aside></div>
