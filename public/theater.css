@@ -32,3 +32,6 @@
 #theater-mini-card{position:relative}
 #theater-mini-media{cursor:pointer}
 @media (max-width:700px){#theater-mini-card .theater-mini-corner{opacity:1;transform:none}}
+/* The mini-player hide control is intentionally explicit and visible. */
+#theater-mini-card:hover .theater-mini-corner,#theater-mini-card:focus-within .theater-mini-corner,#theater-mini-card.is-playing .theater-mini-corner,#theater-mini-card.controls-visible .theater-mini-corner{opacity:1;transform:translateY(0)}
+#theater-mini-card .theater-mini-corner button{min-width:2.5rem;width:auto;padding:0 .55rem;font-size:.68rem}

@@ -183,8 +183,10 @@
   function pauseMusic() { window.TheaterHost?.pauseSong?.(); state.selectedSong = state.selectedSong ? { ...state.selectedSong, isPlaying: false } : state.selectedSong; stopInline(); renderMini(); }
   function hideInline() { const card = $('theater-mini-card'); if (card) card.classList.add('is-hidden'); }
   function syncSong(song) {
+    const previousId = state.selectedSong?.id || state.selectedSong?.storageId || state.selectedSong?.audioUrl;
     state.selectedSong = song || null;
-    if (song?.isPlaying) $('theater-mini-card')?.classList.remove('is-hidden');
+    const nextId = song?.id || song?.storageId || song?.audioUrl;
+    if (song && (song.isPlaying || nextId !== previousId)) $('theater-mini-card')?.classList.remove('is-hidden');
     state.songScene = song?.mediaType === 'video' ? { id: 'song-video', type: 'video', name: song.title, url: song.audioUrl } : null;
     renderMini();
     if (state.opened && state.songScene && !state.scenes.length) showScene(0, Boolean(song.isPlaying));
