@@ -11,7 +11,7 @@
   function loadSettings() { try { state.settings = { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem('our_love_theater_settings') || '{}') }; } catch (_) {} }
   function saveSettings() { localStorage.setItem('our_love_theater_settings', JSON.stringify(state.settings)); }
   function populateSettings() { refreshMusicList(); ['effect','transition','speed','duration','video-audio'].forEach(key => { const el = $('theater-' + key + '-select'); if (el) el.value = String(key === 'video-audio' ? state.settings.videoAudio : state.settings[key]); }); const auto = $('theater-auto-check'); if (auto) auto.checked = state.settings.auto; }
-  function saveSettingsFromPanel() { saveSettings(); populateSettings(); toast('Đã lưu cấu hình rạp chiếu.'); }
+  function saveSettingsFromPanel() { saveSettings(); const panel = $('theater-settings-panel'); if (panel) panel.hidden = true; populateSettings(); toast('Đã lưu cấu hình rạp chiếu.'); }
   const toast = text => { const el = document.getElementById('garden-toast'); if (el) { el.textContent = text; el.classList.add('is-visible'); setTimeout(() => el.classList.remove('is-visible'), 2600); } else console.info(text); };
   const openDb = () => new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 1);
@@ -163,7 +163,7 @@
   }
   function updateProgressLoop() { if (!state.opened || !state.playing) return; updateProgress(); state.raf = requestAnimationFrame(updateProgressLoop); }
   function seek(value) { const scene = currentScene(); if (!scene) return; const media = document.getElementById('theater-' + scene.type); const percent = Number(value) / 100; if (scene.type === 'video' && media?.duration) media.currentTime = media.duration * percent; else if (scene.type === 'image') { state.startedAt = performance.now() - IMAGE_TIME * percent; } updateProgress(); }
-  function openTheater() { window.TheaterHost?.pauseSong?.(); state.opened = true; state.playing = false; $('theater-modal').classList.add('is-open'); document.body.classList.add('theater-open'); loadState().then(() => { setSourceAudio(); showScene(state.current, false); const panel = $('theater-settings-panel'); if (panel) panel.hidden = false; populateSettings(); updateButtons(); }); }
+  function openTheater() { window.TheaterHost?.pauseSong?.(); state.opened = true; state.playing = false; $('theater-modal').classList.add('is-open'); document.body.classList.add('theater-open'); loadState().then(() => { setSourceAudio(); showScene(state.current, false); const panel = $('theater-settings-panel'); if (panel) panel.hidden = true; populateSettings(); updateButtons(); }); }
   function closeTheater() { state.opened = false; pausePlayback(); $('theater-modal').classList.remove('is-open'); document.body.classList.remove('theater-open'); if (document.fullscreenElement) document.exitFullscreen?.(); }
   function toggleFullscreen() { const shell = $('theater-shell'); if (!document.fullscreenElement) shell.requestFullscreen?.(); else document.exitFullscreen?.(); }
   function refreshMusicList() {
