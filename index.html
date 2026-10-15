@@ -2381,7 +2381,8 @@
     }
 
     async function restoreCustomSongs() {
-      if (hasCloudConfig()) return;
+      // Chỉ bỏ qua kho cục bộ khi đã đăng nhập cloud; guest vẫn phải khôi phục MP4 đã lưu trên máy.
+      if (window.loveCloud?.userId) return;
       try {
         const db = await openMusicDatabase();
         const records = await new Promise((resolve, reject) => {
@@ -2407,6 +2408,7 @@
           }
         });
         renderUploadedSongs();
+        if (records.length) document.getElementById('uploaded-song-list')?.classList.remove('hidden');
         const lastSongId = localStorage.getItem('our_love_last_custom_song');
         const restoredIndex = songs.findIndex(song => song.storageId === lastSongId);
         if (restoredIndex >= 0) setSong(restoredIndex);
@@ -2529,14 +2531,14 @@
         showMusicToast('Không tìm thấy bài nhạc này.');
         return;
       }
-      isPlaying = true;
+      isPlaying = false;
       setSong(songIndex);
       const list = document.getElementById('uploaded-song-list');
       if (list) {
         list.classList.add('hidden');
         list.querySelectorAll('.song-more-menu').forEach(menu => menu.classList.add('hidden'));
       }
-      showMusicToast('Đang phát "' + songs[songIndex].title + '".');
+      showMusicToast('Đã chọn "' + songs[songIndex].title + '". Bấm ▶ để phát.');
     }
 
     // Fallback synth for offline/blocked audio
@@ -2738,6 +2740,7 @@
         isPlaying = false;
         setSong(songs.length - newSongs.length);
         renderUploadedSongs();
+        document.getElementById('uploaded-song-list')?.classList.remove('hidden');
         showMusicToast('Đã thêm ' + newSongs.length + ' file vào playlist.');
       })();
     }
