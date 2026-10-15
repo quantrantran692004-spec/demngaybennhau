@@ -6,7 +6,7 @@
 .theater-mini-overlay{position:absolute;inset:auto 0 0;z-index:2;padding:2rem .75rem .55rem;background:linear-gradient(transparent,rgba(9,9,11,.9));pointer-events:none}
 .theater-mini-overlay strong{font-size:.75rem}.theater-mini-overlay span{display:block;color:#fbcfe8;font-size:.65rem;margin-top:.15rem}
 .theater-mini-open{position:absolute;right:.55rem;bottom:.45rem;z-index:3;border:1px solid rgba(255,255,255,.4);border-radius:999px;background:rgba(0,0,0,.45);padding:.35rem .65rem;color:#fff;font-size:.65rem;font-weight:700;backdrop-filter:blur(8px)}
-.theater-mini-meta{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.55rem .7rem;font-size:.65rem;color:#fce7f3}.theater-mini-actions{display:flex;align-items:center;gap:.5rem}.theater-mini-actions label{cursor:pointer;color:#f9a8d4;font-weight:700}.theater-mini-actions input{display:none}.theater-mini-meta button{border:0;background:transparent;color:#f9a8d4;cursor:pointer;font-size:.68rem;font-weight:700}
+.theater-mini-progress-wrap{position:absolute;left:.65rem;right:.65rem;bottom:2.35rem;z-index:4;display:flex;align-items:center;gap:.35rem;padding:.3rem .45rem;border:1px solid rgba(255,255,255,.22);border-radius:.65rem;background:rgba(12,8,14,.62);backdrop-filter:blur(10px);color:#fce7f3;font-size:.58rem}.theater-mini-progress-wrap[hidden]{display:none}.theater-mini-progress{width:100%;min-width:0;height:.2rem;accent-color:#f9a8d4;cursor:pointer}.theater-mini-meta{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.55rem .7rem;font-size:.65rem;color:#fce7f3}.theater-mini-actions{display:flex;align-items:center;gap:.5rem}.theater-mini-actions label{cursor:pointer;color:#f9a8d4;font-weight:700}.theater-mini-actions input{display:none}.theater-mini-meta button{border:0;background:transparent;color:#f9a8d4;cursor:pointer;font-size:.68rem;font-weight:700}
 #theater-modal{position:fixed;inset:0;z-index:150;display:none;align-items:center;justify-content:center;padding:1rem;background:rgba(8,8,12,.72);backdrop-filter:blur(16px)}
 #theater-modal.is-open{display:flex}
 .theater-shell{width:min(1100px,100%);height:min(780px,calc(100dvh - 2rem));display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(251,207,232,.2);border-radius:1.5rem;background:#0c0b10;box-shadow:0 24px 90px rgba(0,0,0,.6);color:#fff}
@@ -42,3 +42,5 @@
   #theater-mini-card.controls-visible .theater-mini-corner,
   #theater-mini-card:focus-within .theater-mini-corner{opacity:1;transform:translateY(0)}
 }
+
+@media (max-width:700px){#theater-mini-progress-wrap{bottom:2.35rem;left:.5rem;right:.5rem;padding:.28rem .4rem}}
