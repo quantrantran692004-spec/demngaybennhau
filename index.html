@@ -2592,6 +2592,7 @@
     function playCurrentAudio() {
       const currentSong = songs[currentSongIndex];
       if (!currentSong) return;
+      if (currentSong.mediaType === 'video') { audioObj.pause(); return; }
       const playPromise = audioObj.play();
       if (playPromise !== undefined) {
         playPromise.catch(error => {
@@ -3515,7 +3516,7 @@
           <div id="theater-settings-panel" class="theater-settings-panel" hidden>
             <div class="theater-settings-heading"><strong>⚙ Cài đặt rạp chiếu</strong><button type="button" onclick="TheaterApp.toggleSettings()">×</button></div>
             <label>Nhạc nền<select id="theater-music-select"><option value="">Chọn bài trong playlist cũ</option></select></label>
-            <div class="theater-settings-grid"><label>Hiệu ứng ảnh<select id="theater-effect-select"><option value="kenburns">Ken Burns</option><option value="fade">Fade</option><option value="slide">Trượt ngang</option><option value="polaroid">Polaroid</option><option value="glow">Soft Glow</option></select></label><label>Chuyển cảnh<select id="theater-transition-select"><option value="fade">Fade</option><option value="slide">Slide</option><option value="zoom">Zoom</option><option value="blur">Blur</option></select></label><label>Tốc độ<select id="theater-speed-select"><option value="slow">Chậm</option><option value="normal">Vừa</option><option value="fast">Nhanh</option></select></label><label>Thời gian ảnh<select id="theater-duration-select"><option value="4">4 giây</option><option value="6.5">6,5 giây</option><option value="10">10 giây</option></select></label></div>
+            <div class="theater-settings-grid"><label>Hiệu ứng ảnh<select id="theater-effect-select"><option value="kenburns">Ken Burns</option><option value="fade">Fade</option><option value="slide">Trượt ngang</option><option value="polaroid">Polaroid</option><option value="glow">Soft Glow</option></select></label><label>Chuyển cảnh<select id="theater-transition-select"><option value="fade">Fade</option><option value="slide">Slide</option><option value="zoom">Zoom</option><option value="blur">Blur</option></select></label><label>Tốc độ<select id="theater-speed-select"><option value="slow">Chậm</option><option value="normal">Vừa</option><option value="fast">Nhanh</option></select></label><label>Âm thanh video<select id="theater-video-audio-select"><option value="original">Giữ âm thanh gốc</option><option value="mute">Tắt âm thanh gốc</option></select></label><label>Thời gian ảnh<select id="theater-duration-select"><option value="4">4 giây</option><option value="6.5">6,5 giây</option><option value="10">10 giây</option></select></label></div>
             <div class="theater-settings-actions"><label>＋ Thêm cảnh<input id="theater-settings-media" type="file" accept="image/*,video/mp4,video/webm" multiple></label><label>▣ Đổi ảnh bìa<input id="theater-settings-cover" type="file" accept="image/*"></label><label class="theater-check"><input id="theater-auto-check" type="checkbox" checked> Tự chuyển cảnh</label></div>
           </div>
 
