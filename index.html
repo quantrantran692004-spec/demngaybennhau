@@ -770,7 +770,7 @@
             <label class="relative overflow-hidden cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-pink-200 dark:border-neutral-600 text-pink-600 dark:text-pink-300 hover:bg-pink-50 dark:hover:bg-neutral-800 text-[11px] font-bold transition-colors">
               <span class="text-sm leading-none">＋</span>
               <span>Thêm nhạc</span>
-              <input id="music-file-input" type="file" accept="audio/*,video/*,.mp3,.mp4,.m4a,.wav,.ogg,.oga,.aac,.flac,.webm" multiple class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0" onchange="addCustomSong(event)">
+              <input id="music-file-input" type="file" accept="audio/*,video/*,.mp3,.mp4,.m4a,.wav,.ogg,.oga,.aac,.flac,.webm,.mov,.m4v" multiple class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0" onchange="addCustomSong(event)">
             </label>
           </div>
           <div class="flex justify-end">
@@ -2717,7 +2717,8 @@
 
     function isAudioFile(file) {
       const extension = String(file.name || '').toLowerCase().split('.').pop();
-      return file.type.startsWith('audio/') || file.type.startsWith('video/') || ['mp3', 'm4a', 'wav', 'ogg', 'oga', 'aac', 'flac', 'webm', 'mp4'].includes(extension);
+      const mime = String(file.type || '').toLowerCase();
+      return mime.startsWith('audio/') || mime.startsWith('video/') || ['mp3', 'm4a', 'wav', 'ogg', 'oga', 'aac', 'flac', 'webm', 'mp4', 'mov', 'm4v'].includes(extension);
     }
     function addCustomSong(event) {
       const files = Array.from(event.target.files || []);
@@ -2730,7 +2731,7 @@
       }
       const tooLargeFile = files.find(file => file.size > 50 * 1024 * 1024);
       if (tooLargeFile && window.loveCloud?.userId) {
-        showMusicToast('File "' + tooLargeFile.name + '" vượt quá giới hạn 50 MB.');
+        showMusicToast('File "' + tooLargeFile.name + '" vượt quá giới hạn lưu cloud 50 MB. Hãy chọn video ngắn hơn hoặc dùng chế độ lưu trên thiết bị.');
         event.target.value = '';
         return;
       }

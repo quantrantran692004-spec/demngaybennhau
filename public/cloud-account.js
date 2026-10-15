@@ -157,10 +157,12 @@
     if (file.size > MAX_AUDIO_BYTES) throw new Error('Mỗi bài nhạc cần nhỏ hơn 50 MB.');
     const id = crypto.randomUUID();
     const extension = (file.name.split('.').pop() || 'mp3').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8) || 'mp3';
+    const isVideo = file.type?.startsWith('video/') || /^(mp4|webm|mov|m4v)$/i.test(extension);
+    const contentType = file.type || (isVideo ? (extension === 'mov' ? 'video/quicktime' : 'video/mp4') : 'audio/mpeg');
     const path = `${user.id}/music/${id}.${extension}`;
     const { error: uploadError } = await supabaseClient.storage.from(bucket).upload(path, file, {
       upsert: false,
-      contentType: file.type || 'audio/mpeg',
+      contentType,
       cacheControl: '3600'
     });
     if (uploadError) throw uploadError;
@@ -171,7 +173,7 @@
       object_path: path,
       title,
       artist: 'Nhạc tải lên cá nhân',
-      content_type: file.type || 'audio/mpeg',
+      content_type: contentType,
       file_size: file.size
     });
     if (rowError) {
@@ -180,7 +182,7 @@
     }
     const { data: signed, error: signedError } = await supabaseClient.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 7);
     if (signedError) throw signedError;
-    return { title, artist: 'Nhạc tải lên cá nhân', cover: '', audioUrl: signed.signedUrl, duration: 0, storageId: `cloud-${id}`, objectPath: path, mediaType: file.type.startsWith('video/') || /\.(mp4|webm|mov)$/i.test(file.name) ? 'video' : 'audio' };
+    return { title, artist: 'Nhạc tải lên cá nhân', cover: '', audioUrl: signed.signedUrl, duration: 0, storageId: `cloud-${id}`, objectPath: path, mediaType: isVideo ? 'video' : 'audio' };
   }
 
   async function restoreSongs() {
