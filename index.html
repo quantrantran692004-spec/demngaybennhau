@@ -2645,7 +2645,7 @@
       }
     }
 
-    function setSong(index) {
+    function setSong(index, autoplay = false) {
       currentSongIndex = (index + songs.length) % songs.length;
       const s = songs[currentSongIndex];
       if (s.storageId) { const lastKey = window.loveCloud?.userId ? 'our_love_last_custom_song:' + window.loveCloud.userId : 'our_love_last_custom_song'; localStorage.setItem(lastKey, s.storageId); }
@@ -2655,7 +2655,8 @@
       const headerTitle = document.getElementById('header-song-title');
       if (headerTitle) headerTitle.innerText = s.title.split('(')[0].trim();
 
-      const wasPlaying = isPlaying;
+      const wasPlaying = Boolean(autoplay);
+      isPlaying = false;
       audioObj.pause();
       stopSoftChords();
       audioObj = new Audio(s.audioUrl || '');
@@ -2682,6 +2683,8 @@
         isPlaying = true;
         updatePlayerUI();
         playCurrentAudio();
+      } else {
+        updatePlayerUI();
       }
       window.TheaterApp?.syncSong?.({ ...s, isPlaying });
     }
@@ -2695,7 +2698,7 @@
         showMusicToast('Đã phát hết danh sách nhạc.');
         return;
       }
-      setSong(currentSongIndex + 1);
+      setSong(currentSongIndex + 1, true);
     }
 
     function prevSong() {
@@ -2704,7 +2707,7 @@
 
     function isAudioFile(file) {
       const extension = String(file.name || '').toLowerCase().split('.').pop();
-      return file.type.startsWith('audio/') || ['mp3', 'm4a', 'wav', 'ogg', 'oga', 'aac', 'flac', 'webm', 'mp4'].includes(extension);
+      return file.type.startsWith('audio/') || file.type.startsWith('video/') || ['mp3', 'm4a', 'wav', 'ogg', 'oga', 'aac', 'flac', 'webm', 'mp4'].includes(extension);
     }
     function addCustomSong(event) {
       const files = Array.from(event.target.files || []);
