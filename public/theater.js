@@ -39,8 +39,7 @@
     if (!state.objectUrls.has(record.id)) state.objectUrls.set(record.id, URL.createObjectURL(record.blob));
     return state.objectUrls.get(record.id);
   }
-  // Cảnh người dùng thêm vào Rạp luôn được ưu tiên trong mini; video của bài nhạc chỉ là dự phòng khi chưa có cảnh riêng.
-  function currentScene() { return state.scenes[state.current] || state.songScene || null; }
+  function currentScene() { return state.songScene || state.scenes[state.current] || null; }
   function clearTimer() { if (state.timer) { clearTimeout(state.timer); state.timer = null; } if (state.raf) cancelAnimationFrame(state.raf); state.raf = 0; }
   function stopMediaOnly() { const video = $('theater-video'); if (video) video.pause(); const audio = $('theater-audio'); if (audio) audio.pause(); }
   async function loadState() {
