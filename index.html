@@ -325,10 +325,6 @@
       transform: rotate(0deg);
     }
 
-    /* Empty layout spacers retained after removing the two games. */
-    .removed-game-space { width: 100%; pointer-events: none; user-select: none; }
-    .removed-garden-space { height: 632px; }
-    .removed-pet-space { height: 719px; }
     @media (max-width: 1100px) {
       header { flex-wrap: wrap; justify-content: space-between; row-gap: 0.35rem; }
       #quick-nav { display: flex !important; order: 3; flex: 1 0 100%; max-width: 100%; gap: 0.2rem; overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding: 0.1rem 0 0.15rem; }
@@ -446,6 +442,32 @@
     .song-drag-item { user-select: none; }
     .song-drag-item:has(.song-more-menu:not(.hidden)) { position: relative; z-index: 50; }
 
+    @media (max-width: 700px) {
+      #quick-nav {
+        display: flex !important;
+        order: 3;
+        flex: 1 0 100%;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        gap: 0.2rem;
+        padding: 0.25rem 0 0.15rem;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-inline: contain;
+      }
+      #quick-nav::-webkit-scrollbar { display: none; }
+      #quick-nav a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 42px;
+        flex: 0 0 auto;
+        white-space: nowrap;
+        padding: 0.45rem 0.7rem;
+        scroll-snap-align: start;
+        touch-action: manipulation;
+      }
+    }
 </style>
 </head>
 <body class="selection:bg-pink-500 selection:text-white min-h-screen flex flex-col justify-between relative overflow-x-hidden">
@@ -477,8 +499,6 @@
       <a href="#timeline" class="px-3 py-1.5 rounded-full bg-pink-500/10 text-pink-600 font-bold">♥ Đếm Ngày Yêu</a>
       <a href="#letters" class="px-3 py-1.5 rounded-full hover:bg-pink-500/10 hover:text-pink-600 transition-colors">Hộp Thư</a>
       <a href="#memories" class="px-3 py-1.5 rounded-full hover:bg-pink-500/10 hover:text-pink-600 transition-colors">Nhật Ký</a>
-      <a href="#our-corner" class="px-3 py-1.5 rounded-full hover:bg-pink-500/10 hover:text-pink-600 transition-colors">Góc Nhỏ</a>
-      <a href="#pet" class="px-3 py-1.5 rounded-full hover:bg-pink-500/10 hover:text-pink-600 transition-colors">Thú Cưng</a>
       <a href="#wishes" class="px-3 py-1.5 rounded-full hover:bg-pink-500/10 hover:text-pink-600 transition-colors">Điều Ước</a>
       <a href="#games" class="px-3 py-1.5 rounded-full hover:bg-pink-500/10 hover:text-pink-600 transition-colors">Trò Chơi</a>
     </nav>
@@ -982,9 +1002,6 @@
       </div>
     </section>
 
-    <!-- Hai trò chơi đã được gỡ bỏ; giữ khoảng trống để không làm xô lệch bố cục cũ. -->
-    <div id="our-corner" class="removed-game-space removed-garden-space" aria-hidden="true"></div>
-    <div id="pet" class="removed-game-space removed-pet-space" aria-hidden="true"></div>
     <!-- 5. BẢNG ĐIỀU ƯỚC (SHARED BUCKET LIST) -->
     <section id="wishes" class="space-y-4">
       <div class="flex items-end justify-between border-b border-pink-200 dark:border-neutral-800 pb-3">
