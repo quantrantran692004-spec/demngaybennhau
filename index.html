@@ -756,10 +756,10 @@
             <span class="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">
               Playlist của hai đứa
             </span>
-            <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-pink-200 dark:border-neutral-600 text-pink-600 dark:text-pink-300 hover:bg-pink-50 dark:hover:bg-neutral-800 text-[11px] font-bold transition-colors">
+            <label class="relative overflow-hidden cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-pink-200 dark:border-neutral-600 text-pink-600 dark:text-pink-300 hover:bg-pink-50 dark:hover:bg-neutral-800 text-[11px] font-bold transition-colors">
               <span class="text-sm leading-none">＋</span>
               <span>Thêm nhạc</span>
-              <input id="music-file-input" type="file" accept="audio/*" multiple class="hidden" onchange="addCustomSong(event)">
+              <input id="music-file-input" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.oga,.aac,.flac,.webm" multiple class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0" onchange="addCustomSong(event)">
             </label>
           </div>
           <div class="flex justify-end">
