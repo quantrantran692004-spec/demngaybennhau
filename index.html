@@ -3162,7 +3162,7 @@
         gardenIsVisible = false;
         const gardenVisibilityObserver = new IntersectionObserver(entries => {
           gardenIsVisible = Boolean(entries[0]?.isIntersecting);
-        }, { threshold: 0.05 });
+        }, { threshold: 0.5 });
         gardenVisibilityObserver.observe(garden);
       }
       let lastGardenFrame = 0;
@@ -3308,7 +3308,7 @@
         illustrationIsVisible = false;
         const illustrationVisibilityObserver = new IntersectionObserver(entries => {
           illustrationIsVisible = Boolean(entries[0]?.isIntersecting);
-        }, { threshold: 0.05 });
+        }, { threshold: 0.5 });
         illustrationVisibilityObserver.observe(garden);
       }
       let lastIllustrationFrame = 0;
